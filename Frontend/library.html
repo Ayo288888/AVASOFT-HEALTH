@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Library | AvaSoft Health</title>
+    <link rel="stylesheet" href="library.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="logo.png">
+</head>
+<body>
+
+    <div class="canvas-bg">
+        <div class="canvas-blob-3"></div>
+    </div>
+
+    <div class="container">
+        <!-- Navigation Header -->
+        <header>
+            <a href="index.html" class="brand">
+                <img src="logo.png" alt="Clinical AI Logo" class="brand-logo">
+                <span class="brand-name">AvaSoft Health</span>
+            </a>
+            <div class="header-links">
+                <a href="app.html" style="margin-right: 1.5rem;">Symptom Assessment</a>
+                <a href="index.html">Exit</a>
+            </div>
+        </header>
+
+        <!-- Search and Title Section -->
+        <section class="library-hero">
+            <h1>Medical Library</h1>
+            <p>Browse our verified dictionary of common medical conditions. Search by illness name or filter by letter below.</p>
+            
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="librarySearch" class="search-input" placeholder="Search illnesses (e.g., Asthma, Migraine)..." oninput="filterIllnesses()">
+            </div>
+        </section>
+
+        <!-- Sticky A-Z Alphabet bar -->
+        <nav class="az-sticky-bar">
+            <ul class="az-list" id="azList">
+                <!-- Javascript will populate these buttons to enable/disable based on entries -->
+            </ul>
+        </nav>
+
+        <!-- Illness List Section -->
+        <section id="illnessGroups">
+            <!-- Programmatically populated by JS for high reliability and clean updates -->
+        </section>
+    </div>
+
+    <!-- Illness Details Drawer/Modal Overlay -->
+    <div class="modal-backdrop" id="detailsModal" onclick="closeModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="toggleModal(false)">✕</button>
+            <div class="modal-header">
+                <h2 id="modalTitle">Illness Name</h2>
+                <div class="illness-tags" id="modalTags" style="margin-top: 5px;"></div>
+            </div>
+            <div class="modal-body">
+                <div class="modal-section">
+                    <h4>About</h4>
+                    <p id="modalAbout">Description of the illness.</p>
+                </div>
+                <div class="modal-section">
+                    <h4>Common Symptoms</h4>
+                    <ul id="modalSymptoms">
+                        <li>Symptom 1</li>
+                    </ul>
+                </div>
+                <div class="modal-section">
+                    <h4>Self-Care & Relief</h4>
+                    <p id="modalCare">Self-care advice.</p>
+                </div>
+                <div class="modal-section">
+                    <h4>When to see a doctor</h4>
+                    <p id="modalDoctor">Advice on seeking clinical care.</p>
+                </div>
+                <hr>
+                <div class="modal-disclaimer">
+                    <strong>Medical Disclaimer:</strong> This dictionary is for educational purposes only. If you are experiencing severe symptoms, difficulty breathing, or sudden chest pain, please seek immediate emergency medical care.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Illness Database & Interaction Scripts -->
+    <script>
+        const illnesses = [
+            {
+                name: "Asthma",
+                letter: "A",
+                about: "Asthma is a chronic condition that affects the airways in your lungs, causing them to become inflamed, narrow, and filled with excess mucus, which makes breathing difficult.",
+                symptoms: ["Shortness of breath", "Chest tightness or pain", "Wheezing when exhaling", "Coughing attacks"],
+                care: "Avoid known allergens or triggers (like dust, smoke, or pollen). Use prescribed quick-relief inhalers (bronchodilators) during flares.",
+                doctor: "Seek immediate care if you experience severe breathlessness, inhaler relief doesn't last, or your fingernails turn blue.",
+                tags: ["Respiratory", "Chronic"]
+            },
+            {
+                name: "Arthritis",
+                letter: "A",
+                about: "Arthritis is the swelling and tenderness of one or more joints. The main symptoms are joint pain and stiffness, which typically worsen with age.",
+                symptoms: ["Joint pain and stiffness", "Swelling and redness around joints", "Decreased range of motion"],
+                care: "Engage in low-impact exercises, apply warm compresses to stiff joints, and ice swollen joints. Over-the-counter pain relief can assist.",
+                doctor: "See a doctor if your joint swelling is accompanied by a fever, or if joint pain prevents you from daily movement.",
+                tags: ["Joints", "Inflammation"]
+            },
+            {
+                name: "Bronchitis",
+                letter: "B",
+                about: "Bronchitis is an inflammation of the lining of your bronchial tubes, which carry air to and from your lungs. It can be acute (often following a cold) or chronic.",
+                symptoms: ["Persistent cough with clear/yellow mucus", "Fatigue", "Shortness of breath", "Slight fever and chills"],
+                care: "Get plenty of rest, drink warm fluids, use a humidifier, and avoid smoking or breathing secondhand smoke.",
+                doctor: "Consult a professional if your cough lasts more than three weeks, produces blood, or is accompanied by a high fever.",
+                tags: ["Respiratory", "Infection"]
+            },
+            {
+                name: "Burn (First-Degree)",
+                letter: "B",
+                about: "A first-degree burn is a mild burn that affects only the outer layer of the skin (epidermis). It causes pain and redness, but does not blister.",
+                symptoms: ["Red skin", "Mild swelling", "Pain that lasts 2-3 days", "Dry, peeling skin as it heals"],
+                care: "Run cool water over the burn for 5-10 minutes. Apply pure aloe vera gel or petroleum jelly. Cover with a loose sterile bandage.",
+                doctor: "Seek care if the burn covers a large area, affects your face or hands, or shows signs of infection (pus, increased warmth).",
+                tags: ["Skin", "First Aid"]
+            },
+            {
+                name: "COVID-19",
+                letter: "C",
+                about: "COVID-19 is an infectious disease caused by the SARS-CoV-2 virus, which spreads primarily through respiratory droplets and causes mild to severe respiratory illness.",
+                symptoms: ["Fever or chills", "Dry cough and shortness of breath", "Loss of taste or smell", "Body aches and fatigue"],
+                care: "Isolate from others, rest, stay hydrated, and monitor oxygen levels. Use fever reducers like acetaminophen if needed.",
+                doctor: "Go to emergency care if you experience trouble breathing, persistent chest pain, confusion, or pale, gray, or blue skin.",
+                tags: ["Viral", "Respiratory"]
+            },
+            {
+                name: "Common Cold",
+                letter: "C",
+                about: "A common cold is a viral infection of your nose and throat (upper respiratory tract). It is usually harmless, though it may not feel that way.",
+                symptoms: ["Runny or stuffy nose", "Sore throat and cough", "Congestion and mild body aches", "Low-grade fever"],
+                care: "Stay hydrated by drinking plenty of water or warm tea. Rest and gargle warm salt water to soothe a sore throat.",
+                doctor: "Consult a doctor if your symptoms worsen or fail to improve after 10 days, or if you run a high fever above 38.5°C.",
+                tags: ["Viral", "Respiratory"]
+            },
+            {
+                name: "Diabetes (Type 2)",
+                letter: "D",
+                about: "Type 2 diabetes is a chronic condition that affects the way your body processes blood sugar (glucose). The body either resists the effects of insulin or doesn't produce enough.",
+                symptoms: ["Increased thirst and frequent urination", "Unexplained weight loss", "Fatigue and blurry vision", "Slow-healing sores"],
+                care: "Follow a balanced low-glycemic diet, exercise regularly, monitor blood glucose levels, and take prescribed medications.",
+                doctor: "Schedule an assessment if you experience persistent dry mouth, extreme lethargy, or numbness in your feet.",
+                tags: ["Metabolic", "Chronic"]
+            },
+            {
+                name: "Dehydration",
+                letter: "D",
+                about: "Dehydration occurs when you use or lose more fluid than you take in, and your body doesn't have enough water and other fluids to carry out its normal functions.",
+                symptoms: ["Extreme thirst", "Less frequent urination and dark-colored urine", "Dry mouth and dizziness", "Confusion"],
+                care: "Drink water or oral rehydration solutions immediately in small, frequent sips. Avoid caffeine or sugary beverages.",
+                doctor: "Seek emergency help if you cannot keep fluids down, feel extremely disoriented, or have diarrhea for more than 24 hours.",
+                tags: ["Vitals", "Acute"]
+            },
+            {
+                name: "Eczema",
+                letter: "E",
+                about: "Eczema (atopic dermatitis) is a condition that makes your skin red, irritated, dry, and itchy. It is common in children but can occur at any age.",
+                symptoms: ["Dry, sensitive skin", "Severe itching (especially at night)", "Red to brownish-gray patches", "Small raised bumps"],
+                care: "Moisturize your skin at least twice a day. Avoid harsh soaps. Use cool, wet compresses to soothe severe itching.",
+                doctor: "See a dermatologist if your skin looks infected (red streaks, pus), or if the discomfort interferes with sleep or daily activities.",
+                tags: ["Skin", "Allergy"]
+            },
+            {
+                name: "Flu (Influenza)",
+                letter: "F",
+                about: "Influenza (flu) is a viral infection that attacks your respiratory system—your nose, throat and lungs. It comes on suddenly and is highly contagious.",
+                symptoms: ["High fever and chills", "Aching muscles (severe body aches)", "Dry, persistent cough", "Headache and weakness"],
+                care: "Get complete bed rest, drink warm broths and water, and take paracetamol or ibuprofen to manage fever and aches.",
+                doctor: "Seek urgent care if you experience shortness of breath, severe throat pain, or if your fever returns after resolving.",
+                tags: ["Viral", "Infection"]
+            },
+            {
+                name: "Food Poisoning",
+                letter: "F",
+                about: "Food poisoning is a foodborne illness caused by eating contaminated, spoiled, or toxic food. The most common cause is bacteria, viruses, or parasites.",
+                symptoms: ["Nausea and vomiting", "Watery or bloody diarrhea", "Abdominal cramps and pain", "Mild fever"],
+                care: "Let your stomach settle by avoiding food for a few hours. Sip water or electrolyte solutions slowly. Gradually introduce bland foods.",
+                doctor: "See a clinician if you cannot keep liquids down, have bloody stools, or experience extreme abdominal pain.",
+                tags: ["Digestive", "Acute"]
+            },
+            {
+                name: "GERD (Acid Reflux)",
+                letter: "G",
+                about: "Gastroesophageal reflux disease (GERD) is a chronic digestive disease that occurs when stomach acid or, occasionally, bile flows back into your food pipe (esophagus).",
+                symptoms: ["Heartburn (burning sensation in chest)", "Chest pain", "Difficulty swallowing", "Regurgitation of food or sour liquid"],
+                care: "Eat smaller meals, avoid lying down for 2-3 hours after eating, and avoid trigger foods (spicy, fatty, acid, caffeine).",
+                doctor: "Consult a doctor if you experience difficulty swallowing, vomit blood, or have persistent chest discomfort.",
+                tags: ["Digestive", "Stomach"]
+            },
+            {
+                name: "Hypertension",
+                letter: "H",
+                about: "Hypertension (high blood pressure) is a common condition in which the long-term force of the blood against your artery walls is high enough that it may eventually cause heart issues.",
+                symptoms: ["Often silent (no symptoms)", "Headaches (in severe cases)", "Shortness of breath or nosebleeds (very high crisis)"],
+                care: "Reduce salt intake, eat a heart-healthy diet, exercise regularly, manage stress, and limit alcohol consumption.",
+                doctor: "Get regular blood pressure screenings. If you register high readings repeatedly, seek medical evaluation.",
+                tags: ["Circulatory", "Chronic"]
+            },
+            {
+                name: "Influenza",
+                letter: "I",
+                about: "Influenza is an infectious respiratory virus causing sudden fever, body aches, cough, and exhaustion. It can lead to complications in vulnerable demographics.",
+                symptoms: ["Sudden fever over 38°C", "Generalized muscle soreness", "Headache and fatigue", "Dry cough"],
+                care: "Stay home, get absolute bed rest, stay hydrated, and take fever reducers. Avoid contact with others.",
+                doctor: "Consult a physician if you are at high risk (asthmatic, elderly, pregnant) or develop chest tightness.",
+                tags: ["Viral", "Respiratory"]
+            },
+            {
+                name: "Kidney Stones",
+                letter: "K",
+                about: "Kidney stones are hard deposits made of minerals and salts that form inside your kidneys. Passing kidney stones can be quite painful.",
+                symptoms: ["Severe, sharp pain in the side and back", "Pain that radiates to the lower abdomen and groin", "Pain on urination", "Pink, red or brown urine"],
+                care: "Drink extra water to help flush the stone out. OTC pain relief can help manage the intense discomfort.",
+                doctor: "Seek immediate medical attention if you have severe pain accompanied by nausea/vomiting, fever/chills, or blood in your urine.",
+                tags: ["Urinary", "Acute"]
+            },
+            {
+                name: "Laryngitis",
+                letter: "L",
+                about: "Laryngitis is an inflammation of your voice box (larynx) from overuse, irritation or infection. It causes your vocal cords to swell, distorting sounds.",
+                symptoms: ["Hoarseness or loss of voice", "Weak voice or voice loss", "Tickling sensation or raw throat", "Dry throat and dry cough"],
+                care: "Rest your voice completely. Drink plenty of warm fluids, use a humidifier, and avoid whispering, which strains vocal cords.",
+                doctor: "See a doctor if your hoarseness lasts more than two weeks, or if you have difficulty breathing or swallowing.",
+                tags: ["Throat", "Infection"]
+            },
+            {
+                name: "Migraine",
+                letter: "M",
+                about: "A migraine is a neurological condition that causes severe throbbing pain or a pulsing sensation, usually on one side of the head, often accompanied by sensory disturbances.",
+                symptoms: ["Throbbing pain on one side of head", "Sensitivity to light, sound, and smell", "Nausea and vomiting", "Visual disturbances (auras)"],
+                care: "Rest in a quiet, dark room. Apply a cool cloth to your forehead. Keep a food diary to identify triggers.",
+                doctor: "Seek emergency care if you experience an abrupt, severe headache like a 'thunderclap', or headache with fever/stiff neck.",
+                tags: ["Neurological", "Headache"]
+            },
+            {
+                name: "Norovirus",
+                letter: "N",
+                about: "Norovirus is a highly contagious virus that causes gastroenteritis, leading to sudden onset of severe vomiting and watery diarrhea.",
+                symptoms: ["Nausea and projectile vomiting", "Watery diarrhea", "Stomach pain or cramps", "Low-grade fever"],
+                care: "Drink fluids with electrolytes to prevent dehydration. Wash hands thoroughly with soap. Disinfect surfaces.",
+                doctor: "Contact a doctor if diarrhea lasts more than 3 days, or if a child shows signs of severe dehydration (no tears, dry tongue).",
+                tags: ["Viral", "Gastro"]
+            },
+            {
+                name: "Osteoarthritis",
+                letter: "O",
+                about: "Osteoarthritis is the most common form of arthritis, occurring when the protective cartilage that cushions the ends of your bones wears down over time.",
+                symptoms: ["Joint pain during or after movement", "Joint stiffness (especially upon waking)", "Loss of flexibility", "Grating sensation in joint"],
+                care: "Maintain a healthy weight to reduce joint stress. Use hot/cold therapy. Gentle exercises like swimming are beneficial.",
+                doctor: "Consult a doctor if joint pain or stiffness limits your mobility or doesn't improve with rest and basic therapies.",
+                tags: ["Joints", "Chronic"]
+            },
+            {
+                name: "Pneumonia",
+                letter: "P",
+                about: "Pneumonia is an infection that inflames the air sacs in one or both lungs, which may fill with fluid or pus, causing cough, fever, and difficulty breathing.",
+                symptoms: ["Chest pain when breathing or coughing", "Cough that produces phlegm", "Shortness of breath and fatigue", "Fever, sweating, and shaking chills"],
+                care: "Get ample rest, stay hydrated, and take all prescribed antibiotics if bacterial. Do not take cough suppressants without consulting a doctor.",
+                doctor: "Seek urgent care if you have trouble breathing, persistent fever above 39°C, or a cough that is getting worse.",
+                tags: ["Respiratory", "Infection"]
+            },
+            {
+                name: "Rhinovirus",
+                letter: "R",
+                about: "Rhinovirus is the most common viral infectious agent in humans and is the predominant cause of the common cold.",
+                symptoms: ["Nasal congestion and runny nose", "Sneezing", "Sore throat", "Mild body fatigue"],
+                care: "Rest, keep hydrated, use saline nasal sprays, and take throat lozenges to ease irritation.",
+                doctor: "Consult a healthcare provider if symptoms do not improve after 10-12 days or if you develop sinus pain.",
+                tags: ["Viral", "Cold"]
+            },
+            {
+                name: "Strep Throat",
+                letter: "S",
+                about: "Strep throat is a bacterial infection caused by Group A Streptococcus that makes your throat feel sore and scratchy, requiring antibiotic treatment.",
+                symptoms: ["Sudden, severe sore throat", "Pain when swallowing", "Fever", "Red and swollen tonsils, sometimes with white patches"],
+                care: "Gargle warm salt water. Drink warm liquids. Strep throat requires prescription antibiotics to prevent rheumatic fever.",
+                doctor: "Always see a doctor to get a throat swab if you suspect strep throat, especially if swallowing or breathing is restricted.",
+                tags: ["Bacterial", "Throat"]
+            },
+            {
+                name: "Tonsillitis",
+                letter: "T",
+                about: "Tonsillitis is inflammation of the tonsils, two oval-shaped pads of tissue at the back of the throat. It is usually caused by a viral or bacterial infection.",
+                symptoms: ["Red, swollen tonsils", "White or yellow coating on tonsils", "Sore throat and painful swallowing", "Swollen lymph nodes in neck"],
+                care: "Rest, drink plenty of warm or cold fluids to soothe throat pain, eat smooth foods, and use throat sprays or lozenges.",
+                doctor: "See a clinician if symptoms last longer than 4 days, or if swallowing becomes so painful you cannot drink liquids.",
+                tags: ["Throat", "Inflammation"]
+            },
+            {
+                name: "Urinary Tract Infection (UTI)",
+                letter: "U",
+                about: "A UTI is an infection in any part of your urinary system—your kidneys, ureters, bladder and urethra. Most infections involve the lower urinary tract.",
+                symptoms: ["Strong, persistent urge to urinate", "Burning sensation when urinating", "Passing frequent, small amounts of urine", "Cloudy or strong-smelling urine"],
+                care: "Drink plenty of water to help flush out bacteria. Avoid carbonated drinks. UTIs usually require antibiotic therapy.",
+                doctor: "See a doctor promptly if you suspect a UTI, or if you develop fever, chills, or back pain (signs of a kidney infection).",
+                tags: ["Urinary", "Bacterial"]
+            },
+            {
+                name: "Varicose Veins",
+                letter: "V",
+                about: "Varicose veins are swollen, twisted veins that lie just under the skin. They usually occur in the legs and are caused by weak or damaged vein valves.",
+                symptoms: ["Veins that are dark purple or blue", "Veins that appear twisted and bulging", "Achy or heavy feeling in legs", "Throbbing or muscle cramping in lower legs"],
+                care: "Exercise regularly, elevate your legs when sitting or lying down, avoid long periods of standing or sitting, and wear compression stockings.",
+                doctor: "Consult a healthcare provider if you develop skin sores near the ankle, or if the veins bleed or cause severe swelling/pain.",
+                tags: ["Circulatory", "Skin"]
+            },
+            {
+                name: "Yellow Fever",
+                letter: "Y",
+                about: "Yellow fever is a serious, potentially fatal viral disease transmitted by mosquitoes in tropical regions of Africa and South America. It is preventable by vaccination.",
+                symptoms: ["Fever and headache", "Muscle aches (particularly backache)", "Nausea and vomiting", "Yellowing of skin/eyes (jaundice) in severe cases"],
+                care: "Get support care in a hospital setting. Prevention through vaccination before traveling is crucial.",
+                doctor: "Seek immediate emergency care if you fall ill after traveling to a high-risk tropical region.",
+                tags: ["Viral", "Tropical"]
+            },
+            {
+                name: "Zika Virus",
+                letter: "Z",
+                about: "Zika virus is a mosquito-borne virus. While symptoms are usually mild, Zika infection during pregnancy can cause severe birth defects in newborns.",
+                symptoms: ["Mild fever and rash", "Joint and muscle pain", "Headache", "Conjunctivitis (red eyes)"],
+                care: "Rest, stay hydrated, and use acetaminophen for fever. Prevent mosquito bites using repellents and protective clothing.",
+                doctor: "Pregnant individuals who have traveled to Zika-active regions should seek medical assessment immediately.",
+                tags: ["Viral", "Mosquito"]
+            }
+        ];
+
+        // 1. POPULATE A-Z Sticky Bar and Groups
+        function initLibrary() {
+            const azList = document.getElementById("azList");
+            const illnessGroups = document.getElementById("illnessGroups");
+            
+            // Get unique letters with entries
+            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+            const activeLetters = [...new Set(illnesses.map(i => i.letter))];
+
+            // Render A-Z Nav List
+            azList.innerHTML = letters.map(letter => {
+                const isActive = activeLetters.includes(letter);
+                return `
+                    <li>
+                        <button 
+                            id="btn-${letter}" 
+                            onclick="scrollToLetter('${letter}')"
+                            ${isActive ? '' : 'disabled'}
+                        >${letter}</button>
+                    </li>
+                `;
+            }).join("");
+
+            // Render Illness Groups and Cards
+            const sortedGroups = {};
+            activeLetters.forEach(l => sortedGroups[l] = []);
+            illnesses.forEach(i => {
+                sortedGroups[i.letter].push(i);
+            });
+
+            // Sort groups alphabetically by name
+            Object.keys(sortedGroups).forEach(l => {
+                sortedGroups[l].sort((a, b) => a.name.localeCompare(b.name));
+            });
+
+            illnessGroups.innerHTML = Object.keys(sortedGroups).map(letter => {
+                const groupCards = sortedGroups[letter].map(i => {
+                    const tagHTML = i.tags.map(t => `<span class="tag">${t}</span>`).join("");
+                    return `
+                        <div class="illness-card" onclick="openDetails('${i.name}')">
+                            <div>
+                                <h3>${i.name}</h3>
+                                <p>${i.about}</p>
+                            </div>
+                            <div class="illness-tags">${tagHTML}</div>
+                        </div>
+                    `;
+                }).join("");
+
+                return `
+                    <div class="alphabet-group" id="group-${letter}">
+                        <h2 class="alphabet-header">${letter}</h2>
+                        <div class="illness-grid">
+                            ${groupCards}
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        // 2. SMOOTH SCROLL TO LETTER
+        function scrollToLetter(letter) {
+            const target = document.getElementById(`group-${letter}`);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+                
+                // Highlight active button
+                document.querySelectorAll(".az-list button").forEach(btn => btn.classList.remove("active"));
+                document.getElementById(`btn-${letter}`).classList.add("active");
+            }
+        }
+
+        // 3. SEARCH FILTER
+        function filterIllnesses() {
+            const query = document.getElementById("librarySearch").value.toLowerCase().trim();
+            const cards = document.querySelectorAll(".illness-card");
+            const groups = document.querySelectorAll(".alphabet-group");
+
+            groups.forEach(group => {
+                let matchesInGroup = 0;
+                const groupCards = group.querySelectorAll(".illness-card");
+
+                groupCards.forEach(card => {
+                    const title = card.querySelector("h3").textContent.toLowerCase();
+                    const desc = card.querySelector("p").textContent.toLowerCase();
+                    
+                    if (title.includes(query) || desc.includes(query)) {
+                        card.style.display = "flex";
+                        matchesInGroup++;
+                    } else {
+                        card.style.display = "none";
+                    }
+                });
+
+                // Hide the whole letter group if no cards match
+                if (matchesInGroup > 0) {
+                    group.style.display = "block";
+                } else {
+                    group.style.display = "none";
+                }
+            });
+
+            // Disable A-Z buttons that have no active cards during search
+            const activeLetters = [...new Set(
+                Array.from(document.querySelectorAll(".illness-card"))
+                    .filter(c => c.style.display !== "none")
+                    .map(c => c.querySelector("h3").textContent.charAt(0))
+            )];
+
+            document.querySelectorAll(".az-list button").forEach(btn => {
+                const letter = btn.textContent;
+                if (activeLetters.includes(letter)) {
+                    btn.disabled = false;
+                } else {
+                    btn.disabled = true;
+                    btn.classList.remove("active");
+                }
+            });
+        }
+
+        // 4. DETAILED MODAL OVERLAY CONTROL
+        function openDetails(name) {
+            const item = illnesses.find(i => i.name === name);
+            if (!item) return;
+
+            document.getElementById("modalTitle").textContent = item.name;
+            document.getElementById("modalTags").innerHTML = item.tags.map(t => `<span class="tag" style="background-color:rgba(63, 159, 255, 0.1); color:var(--blue);">${t}</span>`).join("");
+            document.getElementById("modalAbout").textContent = item.about;
+            
+            const symptomList = document.getElementById("modalSymptoms");
+            symptomList.innerHTML = item.symptoms.map(s => `<li>${s}</li>`).join("");
+
+            document.getElementById("modalCare").textContent = item.care;
+            document.getElementById("modalDoctor").textContent = item.doctor;
+
+            toggleModal(true);
+        }
+
+        function toggleModal(show) {
+            const modal = document.getElementById("detailsModal");
+            if (show) {
+                modal.classList.add("active");
+            } else {
+                modal.classList.remove("active");
+            }
+        }
+
+        function closeModal(e) {
+            // Close when clicking outside of modal-card
+            if (e.target.id === "detailsModal") {
+                toggleModal(false);
+            }
+        }
+
+        // Initialize dictionary
+        window.addEventListener("DOMContentLoaded", initLibrary);
+    </script>
+</body>
+</html>

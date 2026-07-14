@@ -1,0 +1,467 @@
+:root {
+    --navy: #293754;
+    --navy-hover: #1b263b;
+    --blue: #3f9fff;
+    --mint: #00dbcc;
+    --peach: #ff9173;
+    --light-bg: #f8fafc;
+    --white: #ffffff;
+    --text-color: #293754;
+    --text-muted: #5e6e8c;
+    --border-color: rgba(255, 255, 255, 0.5);
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --max-width: 1200px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--white);
+    color: var(--text-color);
+    line-height: 1.6;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* Background canvas blobs (inherited from landing layout) */
+.canvas-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    background-color: #fbfcfd;
+}
+
+.canvas-bg::before,
+.canvas-bg::after,
+.canvas-blob-3 {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(85px);
+    opacity: 0.18;
+    mix-blend-mode: multiply;
+    animation: moveBlobs 25s infinite alternate ease-in-out;
+}
+
+.canvas-bg::before {
+    background-color: var(--blue);
+    width: 500px;
+    height: 500px;
+    top: 0;
+    right: 10%;
+}
+
+.canvas-bg::after {
+    background-color: var(--mint);
+    width: 450px;
+    height: 450px;
+    top: 40%;
+    left: -5%;
+    animation-delay: 5s;
+}
+
+.canvas-blob-3 {
+    background-color: var(--peach);
+    width: 400px;
+    height: 400px;
+    bottom: 10%;
+    right: 15%;
+    animation-delay: 10s;
+}
+
+@keyframes moveBlobs {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(30px, -50px) scale(1.05); }
+    100% { transform: translate(-20px, 30px) scale(0.95); }
+}
+
+.container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* Header */
+header {
+    padding: 1rem 2rem;
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: 100px;
+    box-shadow: 0 10px 30px rgba(41, 55, 84, 0.04);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: var(--navy);
+}
+
+.brand-logo {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+}
+
+.brand-name {
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.header-links a {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.header-links a:hover {
+    color: var(--navy);
+}
+
+/* Library Title & Search */
+.library-hero {
+    text-align: center;
+    padding: 4rem 0 2rem;
+}
+
+.library-hero h1 {
+    font-size: 2.75rem;
+    font-weight: 800;
+    color: var(--navy);
+    letter-spacing: -1px;
+    margin-bottom: 1rem;
+}
+
+.library-hero p {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto 2.5rem;
+}
+
+.search-container {
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 1.1rem 1.5rem 1.1rem 3rem;
+    border-radius: 100px;
+    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    font-family: inherit;
+    font-size: 1.05rem;
+    color: var(--navy);
+    outline: none;
+    box-shadow: 0 10px 30px rgba(41, 55, 84, 0.03);
+    transition: var(--transition);
+}
+
+.search-input:focus {
+    border-color: var(--blue);
+    background: var(--white);
+    box-shadow: 0 10px 35px rgba(63, 159, 255, 0.15);
+}
+
+.search-icon {
+    position: absolute;
+    left: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    pointer-events: none;
+}
+
+/* Sticky A-Z index bar */
+.az-sticky-bar {
+    position: sticky;
+    top: 1.5rem;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 100px;
+    padding: 0.6rem;
+    margin: 2rem 0 3rem;
+    z-index: 50;
+    box-shadow: 0 10px 30px rgba(41, 55, 84, 0.04);
+}
+
+.az-list {
+    display: flex;
+    justify-content: space-between;
+    list-style: none;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.az-list button {
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.az-list button:hover {
+    color: var(--navy);
+    background-color: rgba(41, 55, 84, 0.05);
+}
+
+.az-list button.active {
+    background-color: var(--navy);
+    color: var(--white);
+}
+
+.az-list button:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+}
+
+/* Disease Groups */
+.alphabet-group {
+    margin-bottom: 4rem;
+    scroll-margin-top: 6rem; /* padding for smooth scroll offset */
+}
+
+.alphabet-header {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: var(--navy);
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid rgba(41, 55, 84, 0.1);
+    padding-bottom: 0.5rem;
+}
+
+.illness-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.illness-card {
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(41, 55, 84, 0.02);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.illness-card:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 15px 35px rgba(41, 55, 84, 0.06);
+}
+
+.illness-card h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 0.5rem;
+}
+
+.illness-card p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.illness-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.tag {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    background-color: rgba(41, 55, 84, 0.05);
+    color: var(--text-muted);
+}
+
+/* Detailed Information Modal / Backdrop */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(10, 25, 47, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    padding: 1.5rem;
+}
+
+.modal-backdrop.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal-card {
+    background: var(--white);
+    border-radius: 24px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 60px rgba(41, 55, 84, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    transform: translateY(30px);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.modal-backdrop.active .modal-card {
+    transform: translateY(0);
+}
+
+.modal-close {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    background: rgba(41, 55, 84, 0.05);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 0.95rem;
+    color: var(--navy);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.modal-close:hover {
+    background: rgba(41, 55, 84, 0.1);
+    transform: rotate(90deg);
+}
+
+.modal-header {
+    padding: 2.25rem 2.25rem 1rem;
+}
+
+.modal-header h2 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--navy);
+    margin-bottom: 0.5rem;
+}
+
+.modal-body {
+    padding: 0 2.25rem 2.25rem;
+}
+
+.modal-section {
+    margin-top: 1.5rem;
+}
+
+.modal-section h4 {
+    font-size: 0.95rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.modal-section p {
+    font-size: 0.95rem;
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.modal-section ul {
+    margin-left: 1.25rem;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.modal-section li {
+    margin-bottom: 0.4rem;
+}
+
+.modal-disclaimer {
+    background-color: var(--light-bg);
+    border-radius: 12px;
+    padding: 1rem;
+    border-left: 3px solid var(--peach);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* Custom Scrollbar for Modal */
+.modal-card::-webkit-scrollbar {
+    width: 6px;
+}
+.modal-card::-webkit-scrollbar-thumb {
+    background-color: var(--text-muted);
+    border-radius: 10px;
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    .library-hero h1 { font-size: 2.25rem; }
+    .az-sticky-bar { top: 0.75rem; border-radius: 16px; padding: 0.5rem; }
+    .az-list button { width: 28px; height: 28px; font-size: 0.8rem; }
+    .modal-card { max-height: 95vh; border-radius: 16px; }
+    .modal-header, .modal-body { padding: 1.5rem; }
+}

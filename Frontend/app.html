@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Symptom Assessment | AvaSoft Health</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link rel="icon" type="image/png" href="logo.png">
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#293754",               /* Ada Navy */
+                        "primary-hover": "#1b263b",
+                        "accent-blue": "#5faeff",           /* Lighter Ada Blue */
+                        "accent-blue-hover": "#4fa3f7",
+                        "accent-mint": "#00dbcc",           
+                        "accent-peach": "#ff9173",          
+                        "background": "#faf8ff",            
+                        "surface": "#ffffff",
+                        "outline-variant": "#e2e8f0",
+                        "text-muted": "#5e6e8c",
+                        "on-surface": "#293754",
+                        "surface-container-low": "#faf8ff",
+                        "surface-container-high": "#e2e7ff",
+                        "surface-container-highest": "#dae2fd",
+                        "on-primary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    }
+                },
+            },
+        }
+    </script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #faf8ff; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .clinical-card-shadow { box-shadow: 0px 4px 12px rgba(15, 23, 42, 0.05); }
+        .chat-container-max { max-width: 680px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .bubble-in { animation: slideIn 0.3s ease-out forwards; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .loading-dots { animation: blink 1.4s infinite both; }
+        @keyframes blink { 0% { opacity: .2; } 20% { opacity: 1; } 100% { opacity: .2; } }
+        
+        .recording-active { animation: pulse 1.5s infinite; }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 145, 115, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(255, 145, 115, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 145, 115, 0); }
+        }
+
+        /* Modal backdrop style */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(10, 25, 47, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 1.5rem;
+        }
+        .modal-backdrop.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden text-on-surface">
+
+    <!-- Header -->
+    <header class="flex justify-between items-center w-full px-6 py-4 border-b border-outline-variant bg-white z-10 shrink-0">
+        <div class="flex items-center gap-3">
+            <a href="index.html" class="p-2 hover:bg-slate-100 rounded-full transition-colors text-secondary flex items-center justify-center">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <div class="flex items-center gap-2">
+                <img src="logo.png" alt="Clinical AI Logo" class="w-8 h-8 object-contain">
+                <h1 class="text-xl font-bold text-primary">AvaSoft Health</h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="hidden lg:flex flex-col text-right mr-4">
+                <span class="text-[10px] font-bold text-text-muted/80 uppercase tracking-tighter" id="headerPatientId">Patient ID: #AV-9928</span>
+                <span class="text-[10px] font-bold text-text-muted/80 uppercase tracking-tighter" id="headerSessionId">Session: #442-X</span>
+            </div>
+            <a href="library.html" class="hidden sm:inline-block text-sm font-semibold text-text-muted hover:text-primary transition-colors mr-3">Medical Library</a>
+            <div class="flex items-center gap-2 px-3 py-1 bg-accent-blue/5 text-accent-blue rounded-full border border-accent-blue/20">
+                <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+                <span class="text-[11px] font-semibold uppercase tracking-wider">Secure Analysis</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebars and Chat Layout -->
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- Left Sidebar: Chat Sessions History -->
+        <aside class="hidden md:flex w-64 bg-slate-50 border-r border-outline-variant p-4 flex-col gap-4 shrink-0 overflow-y-auto">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-primary">Assessment History</h3>
+                <button onclick="startNewSession()" class="text-xs font-bold text-accent-blue hover:text-accent-blue-hover flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">add</span> New
+                </button>
+            </div>
+            <div class="flex-1 flex flex-col gap-2 mt-2" id="sessionList">
+                <!-- Session items dynamically injected -->
+            </div>
+            <button onclick="clearAllSessions()" class="w-full py-2 border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-xl text-xs font-semibold transition-all">
+                Clear All History
+            </button>
+        </aside>
+
+        <!-- Main Chat column (scroll container + input footer) -->
+        <main class="flex-1 flex flex-col min-w-0 bg-white relative">
+            
+            <!-- Chat Scroll Area -->
+            <div class="flex-1 overflow-y-auto" id="chatScrollArea">
+                <div class="chat-container-max mx-auto px-6 py-8 space-y-8 pb-12">
+                    
+                    <!-- Persistent Medical Profile banner -->
+                    <div class="bg-surface-container-low border border-outline-variant rounded-xl p-4 flex justify-between items-center clinical-card-shadow mb-4 cursor-pointer hover:bg-slate-50 transition-all" onclick="toggleProfileModal(true)">
+                        <div class="flex gap-6" id="profileDisplay">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold text-accent-blue uppercase">Age</span>
+                                <span class="text-body-md font-semibold" id="profileAge">32</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold text-accent-blue uppercase">Blood Type</span>
+                                <span class="text-body-md font-semibold" id="profileBlood">O+</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold text-accent-blue uppercase">Allergies</span>
+                                <span class="text-body-md font-semibold" id="profileAllergies">None</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-secondary">
+                            <span class="material-symbols-outlined text-[18px]">medical_information</span>
+                            <span class="text-label-md font-medium text-xs">Edit Profile</span>
+                        </div>
+                    </div>
+
+                    <!-- Chat Threads -->
+                    <div class="space-y-8" id="chatThread">
+                        <!-- Messages populated programmatically -->
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Input area footer (static flex child, resolves scroll overlap) -->
+            <footer class="bg-white/90 backdrop-blur-md border-t border-outline-variant p-4 pb-6 z-20 shrink-0">
+                <div class="chat-container-max mx-auto">
+                    
+                    <!-- Mini Image Preview -->
+                    <div id="imagePreview" class="flex gap-2 mb-2 flex-wrap"></div>
+                    
+                    <div class="relative bg-surface-container-low border border-outline-variant rounded-2xl flex items-end p-2 transition-all focus-within:border-accent-blue focus-within:ring-2 focus-within:ring-accent-blue/20 shadow-sm">
+                        <button class="p-3 text-text-muted hover:text-primary transition-colors flex items-center justify-center" onclick="document.getElementById('fileInput').click()">
+                            <span class="material-symbols-outlined">attach_file</span>
+                        </button>
+                        
+                        <textarea id="symptoms" class="w-full bg-transparent border-none focus:ring-0 resize-none text-body-md py-3 px-2 placeholder:text-text-muted/50 h-[52px] max-h-[160px] outline-none" placeholder="Describe your symptoms in detail..." rows="1" oninput="onUserType()"></textarea>
+                        
+                        <div class="flex items-center gap-1 pr-1 pb-1">
+                            <button id="micBtn" class="p-3 text-text-muted hover:text-primary transition-colors flex items-center justify-center rounded-xl" onclick="toggleRecording()">
+                                <span id="micIcon" class="material-symbols-outlined">mic</span>
+                            </button>
+                            <button class="bg-accent-blue hover:bg-accent-blue-hover text-on-primary px-5 py-3 rounded-xl font-medium transition-all flex items-center gap-2 shadow-md" onclick="initiateScan()">
+                                <span class="material-symbols-outlined text-[20px]">send</span>
+                                <span class="hidden sm:inline">Analyze</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Hidden inputs -->
+                    <input type="file" id="fileInput" accept="image/*" onchange="handleFileUpload(event)" style="display: none;">
+                    
+                    <div class="flex justify-between items-center mt-3 px-2">
+                        <div class="flex items-center gap-3 px-3 py-1.5 bg-slate-100 rounded-lg border border-outline-variant/50">
+                            <div class="flex items-center gap-1.5 text-accent-blue text-[10px] font-bold uppercase tracking-widest">
+                                <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">shield_with_heart</span>
+                                <span>HIPAA Compliant</span>
+                            </div>
+                            <div class="w-px h-3 bg-slate-300"></div>
+                            <div class="flex items-center gap-1.5 text-text-muted text-[10px] font-bold uppercase tracking-widest">
+                                <span class="material-symbols-outlined text-[16px]">lock</span>
+                                <span>Encrypted</span>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-text-muted/70 italic text-right max-w-[60%]">
+                            AI-assisted diagnosis is for informational purposes only.
+                        </p>
+                    </div>
+                </div>
+            </footer>
+        </main>
+
+        <!-- Right Sidebar: Vitals Panel -->
+        <aside class="hidden lg:flex w-80 bg-slate-50 border-l border-outline-variant p-6 flex-col gap-6 shrink-0 overflow-y-auto">
+            <div>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-primary border-b border-outline-variant pb-2 mb-4">Clinical Vitals</h3>
+                
+                <!-- Temp input -->
+                <div class="mb-5">
+                    <div class="flex justify-between text-xs font-semibold text-text-muted mb-2">
+                        <span>Body Temperature (°C)</span>
+                    </div>
+                    <div class="relative flex items-center">
+                        <input type="number" id="temperature" placeholder="37.0" step="0.1" class="w-full px-3 py-2 bg-white border border-outline-variant rounded-xl text-sm focus:border-accent-blue focus:ring-1 focus:ring-accent-blue outline-none" oninput="updateTempIndicator(this.value)">
+                        <span id="tempIndicator" class="absolute right-2 px-2 py-1 text-[10px] font-bold rounded-lg bg-teal-50 text-teal-700 border border-teal-200">Normal</span>
+                    </div>
+                </div>
+
+                <!-- Pain severity slider -->
+                <div>
+                    <div class="flex justify-between text-xs font-semibold text-text-muted mb-1">
+                        <span>Pain Severity</span>
+                        <span id="severityDisplay" class="text-accent-blue font-bold">Moderate (5/10)</span>
+                    </div>
+                    <input type="range" id="severity" min="1" max="10" value="5" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-accent-blue my-3" oninput="updateSeverity(this.value)">
+                    <div class="flex justify-between px-1 text-[10px] text-text-muted font-medium">
+                        <span>MILD</span>
+                        <span>MODERATE</span>
+                        <span>SEVERE</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-auto border-t border-outline-variant pt-4">
+                <h4 class="text-xs font-bold text-primary mb-2">Privacy Encryption</h4>
+                <p class="text-xs text-text-muted leading-relaxed">
+                    This interview is securely processed. Vitals and symptoms are processed locally or securely encrypted in compliance with medical data privacy guidelines.
+                </p>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Edit Medical Profile Modal Overlay -->
+    <div id="profileModal" class="modal-backdrop" onclick="toggleProfileModal(false)">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-outline-variant clinical-card-shadow transform scale-95 transition-transform" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4 border-b border-outline-variant pb-2">
+                <h3 class="font-bold text-lg text-primary flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[20px]">medical_information</span>
+                    Patient Profile
+                </h3>
+                <button onclick="toggleProfileModal(false)" class="text-text-muted hover:text-primary">✕</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-text-muted uppercase mb-1">Age</label>
+                    <input type="number" id="editAge" class="w-full px-3 py-2 border border-outline-variant rounded-xl text-sm focus:border-accent-blue outline-none" value="32">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-text-muted uppercase mb-1">Blood Type</label>
+                    <input type="text" id="editBlood" class="w-full px-3 py-2 border border-outline-variant rounded-xl text-sm focus:border-accent-blue outline-none" value="O+">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-text-muted uppercase mb-1">Allergies</label>
+                    <input type="text" id="editAllergies" class="w-full px-3 py-2 border border-outline-variant rounded-xl text-sm focus:border-accent-blue outline-none" value="None">
+                </div>
+                <button onclick="saveProfile()" class="w-full py-3 bg-accent-blue hover:bg-accent-blue-hover text-white rounded-xl font-semibold shadow-md transition-all mt-2">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app_scripts.js"></script>
+</body>
+</html>

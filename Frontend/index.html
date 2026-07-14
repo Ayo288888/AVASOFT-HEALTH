@@ -1,124 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neural Health AI | Universal Triage System</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <title>Health. Powered by AI | Symptom Assessment</title>
+    <link rel="stylesheet" href="landing.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/png" href="logo.png">
 </head>
-<body class="dark-mode">
 
-<canvas id="neuralCanvas"></canvas>
+<body>
 
-<div id="settingsPanel" class="settings-panel">
-    <div class="settings-header">
-        <h3>⚙️ Preferences</h3>
-        <button onclick="toggleSettings()" class="close-btn">✕</button>
+    <div class="canvas-bg">
+        <div class="canvas-blob-3"></div>
     </div>
-    <div class="settings-content">
-        <div class="setting-group">
-            <label>Interface Theme</label>
-            <button onclick="toggleDarkMode()" class="secondary-btn" style="width:100%">Toggle Dark/Light</button>
-        </div>
-        <div class="setting-group">
-            <label>Voice Feedback</label>
-            <label class="checkbox-label">
-                <input type="checkbox" id="voiceEnabled" onchange="updatePersonalization()">
-                <span>Enable Audio Response</span>
-            </label>
-        </div>
+
+    <div class="container">
+        <header>
+            <a href="#" class="brand">
+                <img src="logo.png" alt="Clinical AI Logo" class="brand-logo">
+                <span class="brand-name">AvaSoft Health</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="library.html">Medical Library</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="app.html" class="nav-cta">Launch App</a></li>
+            </ul>
+        </header>
+
+        <section class="hero">
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <h1>I'm your health assistant, optimized by <span style="white-space: nowrap;"><span
+                                class="ai-pill">Artifical Intelligence</span></span></h1>
+                    <p>Tell us how you are feeling, answer tailored questions, and receive clear medical guidance.
+                        Simple, confidential, and instant.</p>
+                    <div class="cta-group">
+                        <a href="app.html" class="btn-primary">Start symptom assessment</a>
+                        <a href="#how-it-works" class="btn-secondary">How it works</a>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="mockup-card">
+                        <div class="mockup-header">
+                            <span class="mockup-circle"></span>
+                            <span class="mockup-circle"></span>
+                            <span class="mockup-circle"></span>
+                        </div>
+                        <div class="mockup-item">
+                            <span class="icon">🔍</span>
+                            <span>Analyzing: "High fever and headache"</span>
+                        </div>
+                        <div class="mockup-item" style="border-left: 3px solid var(--blue);">
+                            <span class="icon">🩺</span>
+                            <span>Differential: Influenza (High)</span>
+                        </div>
+                        <div class="mockup-item" style="border-left: 3px solid var(--mint);">
+                            <span class="icon">💬</span>
+                            <span>Actionable clinical suggestions</span>
+                        </div>
+                        <div class="mockup-item" style="border-left: 3px solid var(--peach);">
+                            <span class="icon">🔒</span>
+                            <span>HIPAA Data Encrypted</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
-</div>
 
-<div class="container">
-    <header>
-        <div class="brand-box">
-            <h1>🧬 Neural Health AI</h1>
-            <p id="greeting">Secure Clinical Analysis Active</p>
+    <section id="how-it-works" class="info-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>How AvaSoft Health Symptom Triage works</h2>
+                <p>Get a clearer picture of your symptoms in three simple steps.</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <h3>1. Describe symptoms</h3>
+                    <p>Type or speak what you are experiencing. You can also upload a clinical image if relevant for
+                        visual diagnosis.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">❓</div>
+                    <h3>2. Answer questions</h3>
+                    <p>The AI system processes the symptoms and asks smart follow-up questions to refine the triage
+                        possibilities.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📋</div>
+                    <h3>3. Get a custom report</h3>
+                    <p>Review the top likely conditions with confidence rankings, suggested relief steps, pharmacy
+                        advice, and red flags.</p>
+                </div>
+            </div>
         </div>
-        <div class="header-controls">
-            <button onclick="toggleSettings()" class="icon-btn" title="Settings">⚙️</button>
-            <button onclick="clearChat()" class="icon-btn" title="New Session">🗑️</button>
+    </section>
+
+    <section class="privacy-ribbon">
+        <div class="container">
+            <div class="privacy-content">
+                <h2>Your data is safe and secure</h2>
+                <p>We apply the highest privacy standards to protect your personal information. Assessments are
+                    completely confidential and fully encrypted.</p>
+            </div>
         </div>
-    </header>
+    </section>
 
-    <div class="main-layout">
-        <main class="interaction-area">
-            
-            <div id="chatThread" class="chat-thread">
-                <div class="ai-message">
-                    <div class="message-icon">🤖</div>
-                    <div class="message-content">
-                        Welcome to Neural Health AI. Please describe your symptoms in detail. You can also upload a medical image or use the microphone to speak.
-                    </div>
-                </div>
-            </div>
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 AvaSoft Health AI. Inspired by Ada. Educational demonstration purposes only. Not a medical
+                diagnosis.</p>
+        </div>
+    </footer>
 
-            <div class="chat-input-section">
-                <div id="imagePreview" class="mini-preview-container"></div>
-                
-                <div class="input-container-inner">
-                    <textarea 
-                        id="symptoms" 
-                        oninput="onUserType()" 
-                        rows="1"
-                        placeholder="Describe your symptoms or answer follow-up questions..."
-                    ></textarea>
-                    
-                    <div class="input-actions">
-                        <button onclick="document.getElementById('fileInput').click()" class="action-icon-btn" title="Attach Image">📁</button>
-                        
-                        <button id="micBtn" onclick="toggleRecording()" class="action-icon-btn" title="Voice Input">
-                            <span id="micIcon">🎤</span>
-                        </button>
-                        
-                        <button id="submitBtn" onclick="initiateScan()" class="send-btn">
-                            <span>Analyze</span>
-                            <span class="btn-icon">🚀</span>
-                        </button>
-                    </div>
-                </div>
-
-                <input type="file" id="fileInput" accept="image/*" onchange="handleFileUpload(event)" style="display:none;">
-            </div>
-        </main>
-
-        <aside class="sidebar">
-            <div class="sidebar-section">
-                <h4>📊 Clinical Vitals</h4>
-                <div class="vital-input">
-                    <label>Temperature (°C)</label>
-                    <div class="input-with-indicator">
-                        <input type="number" id="temperature" placeholder="37.0" step="0.1" oninput="updateTempIndicator(this.value)">
-                        <span class="temp-indicator" id="tempIndicator">Normal</span>
-                    </div>
-                </div>
-                <div class="vital-input">
-                    <label>Pain Severity (1-10)</label>
-                    <input type="range" id="severity" min="1" max="10" value="5" oninput="updateSeverity(this.value)">
-                    <div class="severity-display">
-                        <span id="severityValue">5</span>
-                        <span id="severityLabel">Moderate</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="sidebar-section">
-                <h4>🧠 AI Insights</h4>
-                <div class="insight-card">
-                    <p class="insight-text">Multi-agent analysis ensures 94% triage accuracy by combining visual and linguistic data.</p>
-                </div>
-            </div>
-
-            <div class="sidebar-section">
-                <h4>🔒 Data Privacy</h4>
-                <p class="privacy-note">Session encrypted. All medical data is processed according to HIPAA-compliant standards.</p>
-            </div>
-        </aside>
-    </div>
-</div>
-
-<script src="scripts.js"></script>
 </body>
+
 </html>
