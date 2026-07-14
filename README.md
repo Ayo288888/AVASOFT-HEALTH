@@ -1,5 +1,5 @@
 AI Multi-Agent Healthcare System (Healthcare Chatbot)
-This project is an AI-powered health assistant that analyzes user-described symptoms to predict potential diseases and gives medical advice and sugestions. it  uses multi-modal FastAPI triage engine that combines a custom Hugging Face classification model developed by Ilori Ayomide, Gemini 3, Groq Whisper, and a custom CNN model developed by Adejare to deliver instant, voice-enabled patient care via a lightweight web UI.
+This project is an AI-powered health assistant that analyzes user-described symptoms to predict potential diseases and gives medical advice and sugestions. it  uses multi-modal FastAPI triage engine that combines a custom Hugging Face classification model developed by Ilori Ayomide and a custom CNN model developed by Adejare Adelugba to deliver instant, voice-enabled patient care via a lightweight web UI.
 
 ## 🚀 Key Features
 
@@ -16,7 +16,7 @@ This project is an AI-powered health assistant that analyzes user-described symp
 * **Security:** `python-dotenv` for strict environment variable isolation
 
 🛠️ Tech Stack
-Python 3.12+
+Python 3.11+
 
 Backend: FastAPI
 
