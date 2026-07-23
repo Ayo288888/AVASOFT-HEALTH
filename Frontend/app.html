@@ -45,13 +45,29 @@
     </script>
     
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #faf8ff; }
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
+        html.dark body { background-color: #060914; color: #f8fafc; }
+        html.dark header { background-color: rgba(10, 16, 32, 0.85); border-color: rgba(255, 255, 255, 0.12); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
+        html.dark footer { background-color: rgba(10, 16, 32, 0.9); border-color: rgba(255, 255, 255, 0.12); }
+        html.dark aside { background-color: #070c18; border-color: rgba(255, 255, 255, 0.1); }
+        html.dark main { background-color: #060914; }
+        html.dark .bg-white { background-color: #0b1120; }
+        html.dark .bg-slate-50 { background-color: #070c18; }
+        html.dark .bg-surface-container-low { background-color: #0f172a; border-color: rgba(255, 255, 255, 0.12); }
+        html.dark .text-primary { color: #f8fafc; }
+        html.dark .text-on-surface { color: #f8fafc; }
+        html.dark .text-text-muted { color: #94a3b8; }
+        html.dark .border-outline-variant { border-color: rgba(255, 255, 255, 0.12); }
+        html.dark .modal-card { background-color: #0f172a; color: #f8fafc; border-color: rgba(255, 255, 255, 0.15); box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8); }
+        
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
         .clinical-card-shadow { box-shadow: 0px 4px 12px rgba(15, 23, 42, 0.05); }
+        html.dark .clinical-card-shadow { box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1); }
         .chat-container-max { max-width: 680px; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        html.dark ::-webkit-scrollbar-thumb { background: #334155; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
         .bubble-in { animation: slideIn 0.3s ease-out forwards; }
@@ -71,9 +87,9 @@
         .modal-backdrop {
             position: fixed;
             inset: 0;
-            background-color: rgba(10, 25, 47, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background-color: rgba(4, 7, 17, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             z-index: 1000;
             display: flex;
             align-items: center;
@@ -87,6 +103,27 @@
             opacity: 1;
             pointer-events: all;
         }
+
+        /* Symptom Chip */
+        .symptom-chip {
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+        .symptom-chip:hover {
+            transform: translateY(-1px);
+        }
+        .symptom-chip.selected {
+            background-color: #5faeff;
+            color: #ffffff;
+            border-color: #5faeff;
+            box-shadow: 0 0 12px rgba(95, 174, 255, 0.4);
+        }
+        html.dark .symptom-chip:hover:not(.selected) {
+            background-color: rgba(95, 174, 255, 0.15);
+            color: #5faeff;
+            border-color: rgba(95, 174, 255, 0.3);
+        }
     </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden text-on-surface">
@@ -94,7 +131,7 @@
     <!-- Header -->
     <header class="flex justify-between items-center w-full px-6 py-4 border-b border-outline-variant bg-white z-10 shrink-0">
         <div class="flex items-center gap-3">
-            <a href="index.html" class="p-2 hover:bg-slate-100 rounded-full transition-colors text-secondary flex items-center justify-center">
+            <a href="index.html" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-secondary flex items-center justify-center" aria-label="Back to home">
                 <span class="material-symbols-outlined">arrow_back</span>
             </a>
             <div class="flex items-center gap-2">
@@ -108,6 +145,12 @@
                 <span class="text-[10px] font-bold text-text-muted/80 uppercase tracking-tighter" id="headerSessionId">Session: #442-X</span>
             </div>
             <a href="library.html" class="hidden sm:inline-block text-sm font-semibold text-text-muted hover:text-primary transition-colors mr-3">Medical Library</a>
+            
+            <!-- Dark Mode Switcher Button -->
+            <button onclick="toggleTheme()" class="p-2 rounded-full border border-outline-variant hover:bg-slate-100 dark:hover:bg-slate-800 transition-all flex items-center justify-center text-text-muted hover:text-primary" aria-label="Toggle Dark Mode">
+                <span class="material-symbols-outlined text-[20px]" id="themeIcon">dark_mode</span>
+            </button>
+
             <div class="flex items-center gap-2 px-3 py-1 bg-accent-blue/5 text-accent-blue rounded-full border border-accent-blue/20">
                 <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">verified_user</span>
                 <span class="text-[11px] font-semibold uppercase tracking-wider">Secure Analysis</span>
@@ -129,7 +172,7 @@
             <div class="flex-1 flex flex-col gap-2 mt-2" id="sessionList">
                 <!-- Session items dynamically injected -->
             </div>
-            <button onclick="clearAllSessions()" class="w-full py-2 border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-xl text-xs font-semibold transition-all">
+            <button onclick="clearAllSessions()" class="w-full py-2 border border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl text-xs font-semibold transition-all">
                 Clear All History
             </button>
         </aside>
@@ -137,59 +180,70 @@
         <!-- Main Chat column (scroll container + input footer) -->
         <main class="flex-1 flex flex-col min-w-0 bg-white relative">
             
-            <!-- Chat Scroll Area -->
-            <div class="flex-1 overflow-y-auto" id="chatScrollArea">
-                <div class="chat-container-max mx-auto px-6 py-8 space-y-8 pb-12">
-                    
-                    <!-- Persistent Medical Profile banner -->
-                    <div class="bg-surface-container-low border border-outline-variant rounded-xl p-4 flex justify-between items-center clinical-card-shadow mb-4 cursor-pointer hover:bg-slate-50 transition-all" onclick="toggleProfileModal(true)">
-                        <div class="flex gap-6" id="profileDisplay">
-                            <div class="flex flex-col">
-                                <span class="text-[10px] font-bold text-accent-blue uppercase">Age</span>
-                                <span class="text-body-md font-semibold" id="profileAge">32</span>
-                            </div>
-                            <div class="flex flex-col">
-                                <span class="text-[10px] font-bold text-accent-blue uppercase">Blood Type</span>
-                                <span class="text-body-md font-semibold" id="profileBlood">O+</span>
-                            </div>
-                            <div class="flex flex-col">
-                                <span class="text-[10px] font-bold text-accent-blue uppercase">Allergies</span>
-                                <span class="text-body-md font-semibold" id="profileAllergies">None</span>
-                            </div>
+            <!-- Pinned Medical Profile Header (Fixed above scroll area so it never scrolls away) -->
+            <div class="bg-surface-container-low border-b border-outline-variant px-6 py-3 shrink-0 shadow-sm">
+                <div class="chat-container-max mx-auto flex justify-between items-center">
+                    <div class="flex gap-6" id="profileDisplay">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-bold text-accent-blue uppercase">Age</span>
+                            <span class="text-xs font-semibold" id="profileAge">32</span>
                         </div>
-                        <div class="flex items-center gap-2 text-secondary">
-                            <span class="material-symbols-outlined text-[18px]">medical_information</span>
-                            <span class="text-label-md font-medium text-xs">Edit Profile</span>
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-bold text-accent-blue uppercase">Blood Type</span>
+                            <span class="text-xs font-semibold" id="profileBlood">O+</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-bold text-accent-blue uppercase">Allergies</span>
+                            <span class="text-xs font-semibold" id="profileAllergies">None</span>
                         </div>
                     </div>
-
-                    <!-- Chat Threads -->
-                    <div class="space-y-8" id="chatThread">
-                        <!-- Messages populated programmatically -->
-                    </div>
-
+                    <button onclick="toggleProfileModal(true)" class="flex items-center gap-1.5 text-accent-blue hover:text-accent-blue-hover text-xs font-semibold transition-colors">
+                        <span class="material-symbols-outlined text-[16px]">medical_information</span>
+                        <span>Edit Profile</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- Input area footer (static flex child, resolves scroll overlap) -->
-            <footer class="bg-white/90 backdrop-blur-md border-t border-outline-variant p-4 pb-6 z-20 shrink-0">
+            <!-- Chat Scroll Area -->
+            <div class="flex-1 overflow-y-auto" id="chatScrollArea">
+                <div class="chat-container-max mx-auto px-6 py-6 space-y-6 pb-8">
+                    <!-- Chat Threads -->
+                    <div class="space-y-6" id="chatThread">
+                        <!-- Messages populated programmatically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input area footer (static flex child) -->
+            <footer class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-outline-variant p-4 pb-6 z-20 shrink-0">
                 <div class="chat-container-max mx-auto">
                     
+                    <!-- Symptom Quick-Chips -->
+                    <div class="flex items-center gap-1.5 mb-3 overflow-x-auto pb-1 text-xs no-scrollbar" id="symptomChips">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-text-muted mr-1 shrink-0">Quick Symptoms:</span>
+                        <button onclick="toggleSymptomChip('Fever', this)" class="symptom-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-text-muted hover:text-primary rounded-full border border-outline-variant shrink-0 font-medium">+ Fever</button>
+                        <button onclick="toggleSymptomChip('Headache', this)" class="symptom-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-text-muted hover:text-primary rounded-full border border-outline-variant shrink-0 font-medium">+ Headache</button>
+                        <button onclick="toggleSymptomChip('Chest Pain', this)" class="symptom-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-text-muted hover:text-primary rounded-full border border-outline-variant shrink-0 font-medium">+ Chest Pain</button>
+                        <button onclick="toggleSymptomChip('Shortness of Breath', this)" class="symptom-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-text-muted hover:text-primary rounded-full border border-outline-variant shrink-0 font-medium">+ Shortness of Breath</button>
+                        <button onclick="toggleSymptomChip('Cough', this)" class="symptom-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-text-muted hover:text-primary rounded-full border border-outline-variant shrink-0 font-medium">+ Cough</button>
+                        <button onclick="toggleSymptomChip('Nausea', this)" class="symptom-chip px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-text-muted hover:text-primary rounded-full border border-outline-variant shrink-0 font-medium">+ Nausea</button>
+                    </div>
+
                     <!-- Mini Image Preview -->
                     <div id="imagePreview" class="flex gap-2 mb-2 flex-wrap"></div>
                     
                     <div class="relative bg-surface-container-low border border-outline-variant rounded-2xl flex items-end p-2 transition-all focus-within:border-accent-blue focus-within:ring-2 focus-within:ring-accent-blue/20 shadow-sm">
-                        <button class="p-3 text-text-muted hover:text-primary transition-colors flex items-center justify-center" onclick="document.getElementById('fileInput').click()">
+                        <button class="p-3 text-text-muted hover:text-primary transition-colors flex items-center justify-center" onclick="document.getElementById('fileInput').click()" aria-label="Attach File">
                             <span class="material-symbols-outlined">attach_file</span>
                         </button>
                         
-                        <textarea id="symptoms" class="w-full bg-transparent border-none focus:ring-0 resize-none text-body-md py-3 px-2 placeholder:text-text-muted/50 h-[52px] max-h-[160px] outline-none" placeholder="Describe your symptoms in detail..." rows="1" oninput="onUserType()"></textarea>
+                        <textarea id="symptoms" class="w-full bg-transparent border-none focus:ring-0 resize-none text-body-md py-3 px-2 placeholder:text-text-muted/50 h-[52px] max-h-[160px] outline-none" placeholder="Describe your symptoms in detail... (Press Enter to analyze)" rows="1" oninput="onUserType()"></textarea>
                         
                         <div class="flex items-center gap-1 pr-1 pb-1">
-                            <button id="micBtn" class="p-3 text-text-muted hover:text-primary transition-colors flex items-center justify-center rounded-xl" onclick="toggleRecording()">
+                            <button id="micBtn" class="p-3 text-text-muted hover:text-primary transition-colors flex items-center justify-center rounded-xl" onclick="toggleRecording()" aria-label="Toggle Voice Input">
                                 <span id="micIcon" class="material-symbols-outlined">mic</span>
                             </button>
-                            <button class="bg-accent-blue hover:bg-accent-blue-hover text-on-primary px-5 py-3 rounded-xl font-medium transition-all flex items-center gap-2 shadow-md" onclick="initiateScan()">
+                            <button class="bg-accent-blue hover:bg-accent-blue-hover text-white px-5 py-3 rounded-xl font-medium transition-all flex items-center gap-2 shadow-md" onclick="initiateScan()" aria-label="Analyze Symptoms">
                                 <span class="material-symbols-outlined text-[20px]">send</span>
                                 <span class="hidden sm:inline">Analyze</span>
                             </button>
@@ -200,12 +254,12 @@
                     <input type="file" id="fileInput" accept="image/*" onchange="handleFileUpload(event)" style="display: none;">
                     
                     <div class="flex justify-between items-center mt-3 px-2">
-                        <div class="flex items-center gap-3 px-3 py-1.5 bg-slate-100 rounded-lg border border-outline-variant/50">
+                        <div class="flex items-center gap-3 px-3 py-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-lg border border-outline-variant/50">
                             <div class="flex items-center gap-1.5 text-accent-blue text-[10px] font-bold uppercase tracking-widest">
                                 <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">shield_with_heart</span>
                                 <span>HIPAA Compliant</span>
                             </div>
-                            <div class="w-px h-3 bg-slate-300"></div>
+                            <div class="w-px h-3 bg-slate-300 dark:bg-slate-700"></div>
                             <div class="flex items-center gap-1.5 text-text-muted text-[10px] font-bold uppercase tracking-widest">
                                 <span class="material-symbols-outlined text-[16px]">lock</span>
                                 <span>Encrypted</span>
@@ -284,6 +338,35 @@
                 </div>
                 <button onclick="saveProfile()" class="w-full py-3 bg-accent-blue hover:bg-accent-blue-hover text-white rounded-xl font-semibold shadow-md transition-all mt-2">
                     Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Triage Red-Flag Modal -->
+    <div id="emergencyModal" class="modal-backdrop" onclick="toggleEmergencyModal(false)">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border-2 border-rose-500 clinical-card-shadow transform scale-95 transition-transform" onclick="event.stopPropagation()">
+            <div class="flex items-center gap-3 mb-3 text-rose-600 dark:text-rose-400">
+                <span class="material-symbols-outlined text-[32px]">warning</span>
+                <h3 class="font-extrabold text-xl">Emergency Medical Alert</h3>
+            </div>
+            <div class="space-y-3 text-sm text-on-surface">
+                <p class="font-semibold text-rose-700 dark:text-rose-300">
+                    Your reported symptoms (<span id="emergencySymptomText" class="underline"></span>) indicate a potential life-threatening clinical emergency.
+                </p>
+                <p class="text-text-muted leading-relaxed">
+                    Do not wait for AI assessment. If you are experiencing chest pain, difficulty breathing, sudden weakness, or loss of consciousness, please seek immediate emergency care.
+                </p>
+                <div class="p-3 bg-rose-50 dark:bg-rose-950/40 rounded-xl border border-rose-200 dark:border-rose-900 flex items-center justify-between">
+                    <span class="font-bold text-rose-800 dark:text-rose-200 text-xs">Emergency Services:</span>
+                    <a href="tel:911" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold text-sm shadow flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[18px]">phone_in_talk</span> Call 911 / 112
+                    </a>
+                </div>
+            </div>
+            <div class="mt-5 flex gap-2">
+                <button onclick="toggleEmergencyModal(false)" class="w-full py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-text-muted rounded-xl font-semibold text-xs transition-all">
+                    Dismiss & Continue Triage
                 </button>
             </div>
         </div>
