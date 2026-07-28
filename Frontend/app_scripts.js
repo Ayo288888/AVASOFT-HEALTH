@@ -288,7 +288,7 @@ async function sendVoiceData(blob) {
     appendMessage("ai", "Transcribing voice clinical feed... 🎙️");
 
     try {
-        const response = await fetch('http://127.0.0.1:8000/predict/voice', { method: 'POST', body: formData });
+        const response = await fetch('/predict/voice', { method: 'POST', body: formData });
         const data = await response.json();
         
         document.getElementById("symptoms").value = data.transcription;
@@ -448,7 +448,7 @@ async function initiateScan() {
         if (uploadedImages.length > 0) {
             const formData = new FormData();
             formData.append('file', uploadedImages[0].file);
-            response = await fetch('http://127.0.0.1:8000/predict/image', { method: 'POST', body: formData });
+            response = await fetch('/predict/image', { method: 'POST', body: formData });
             uploadedImages = [];
             document.getElementById('imagePreview').innerHTML = "";
         } else {
@@ -459,7 +459,7 @@ async function initiateScan() {
             
             conversationHistory.push({ role: "user", content: textInput + vitalsContext });
             
-            response = await fetch('http://127.0.0.1:8000/predict', { 
+            response = await fetch('/predict', { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: JSON.stringify(conversationHistory) }) 

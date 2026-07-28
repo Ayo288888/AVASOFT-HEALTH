@@ -1,10 +1,10 @@
 fastapi
 uvicorn
-transformers
-torch
 pydantic
 python-multipart
 google-genai
 groq
 python-dotenv
 Pillow
+requests
+

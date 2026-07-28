@@ -52,7 +52,7 @@ async function sendVoiceData(blob) {
     appendMessage("ai", "Transcribing your voice... 🎙️");
 
     try {
-        const response = await fetch('http://127.0.0.1:8000/predict/voice', { method: 'POST', body: formData });
+        const response = await fetch('/predict/voice', { method: 'POST', body: formData });
         const data = await response.json();
         
         // Remove the "Processing" bubble (optional, or just append the next)
@@ -125,12 +125,12 @@ async function initiateScan() {
         if (uploadedImages.length > 0) {
             const formData = new FormData();
             formData.append('file', uploadedImages[0].file);
-            response = await fetch('http://127.0.0.1:8000/predict/image', { method: 'POST', body: formData });
+            response = await fetch('/predict/image', { method: 'POST', body: formData });
             uploadedImages = [];
             document.getElementById('imagePreview').innerHTML = "";
         } else {
             conversationHistory.push({ role: "user", content: textInput });
-            response = await fetch('http://127.0.0.1:8000/predict', { 
+            response = await fetch('/predict', { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: JSON.stringify(conversationHistory) }) 
