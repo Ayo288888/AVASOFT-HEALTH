@@ -7,6 +7,27 @@
     <link rel="stylesheet" href="library.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="logo.png">
+    <script>
+        (function() {
+            const saved = localStorage.getItem('avaSoftTheme') || 'light';
+            if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        })();
+        function toggleTheme() {
+            const curr = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+            const next = curr === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('avaSoftTheme', next);
+            updateThemeIcon(next);
+        }
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('themeIcon');
+            if (icon) icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('avaSoftTheme') || 'light';
+            updateThemeIcon(saved);
+        });
+    </script>
 </head>
 <body>
 
@@ -21,8 +42,9 @@
                 <img src="logo.png" alt="Clinical AI Logo" class="brand-logo">
                 <span class="brand-name">AvaSoft Health</span>
             </a>
-            <div class="header-links">
-                <a href="app.html" style="margin-right: 1.5rem;">Symptom Assessment</a>
+            <div class="header-links" style="display: flex; align-items: center; gap: 1rem;">
+                <button onclick="toggleTheme()" class="theme-toggle-btn" aria-label="Toggle Theme"><span id="themeIcon">🌙</span></button>
+                <a href="app.html">Symptom Assessment</a>
                 <a href="index.html">Exit</a>
             </div>
         </header>

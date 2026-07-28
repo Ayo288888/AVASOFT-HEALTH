@@ -9,6 +9,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="icon" type="image/png" href="logo.png">
+    <script>
+        (function() {
+            const saved = localStorage.getItem('avaSoftTheme') || 'light';
+            if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        })();
+        function toggleTheme() {
+            const curr = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+            const next = curr === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('avaSoftTheme', next);
+            updateThemeIcon(next);
+        }
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('themeIcon');
+            if (icon) icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('avaSoftTheme') || 'light';
+            updateThemeIcon(saved);
+        });
+    </script>
 </head>
 
 <body>
@@ -26,6 +47,7 @@
             <ul class="nav-links">
                 <li><a href="library.html">Medical Library</a></li>
                 <li><a href="#how-it-works">How It Works</a></li>
+                <li><button onclick="toggleTheme()" class="theme-toggle-btn" aria-label="Toggle Theme"><span id="themeIcon">🌙</span></button></li>
                 <li><a href="app.html" class="nav-cta">Launch App</a></li>
             </ul>
         </header>
@@ -34,7 +56,7 @@
             <div class="hero-grid">
                 <div class="hero-content">
                     <h1>I'm your health assistant, optimized by <span style="white-space: nowrap;"><span
-                                class="ai-pill">Artifical Intelligence</span></span></h1>
+                                class="ai-pill">Artificial Intelligence</span></span></h1>
                     <p>Tell us how you are feeling, answer tailored questions, and receive clear medical guidance.
                         Simple, confidential, and instant.</p>
                     <div class="cta-group">

@@ -14,6 +14,16 @@
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+[data-theme="dark"] {
+    --navy: #f8fafc;
+    --navy-hover: #ffffff;
+    --light-bg: #0b1120;
+    --white: #151e32;
+    --text-color: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -555,3 +565,40 @@ body {
         height: 550px;
     }
 }
+
+/* Dark Mode Overrides */
+[data-theme="dark"] .app-header {
+    background-color: rgba(10, 16, 32, 0.85);
+    border-bottom-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .assessment-card,
+[data-theme="dark"] .sidebar-panel {
+    background-color: #0f172a;
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .card-header,
+[data-theme="dark"] .chat-input-bar,
+[data-theme="dark"] .sidebar-panel h3 {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .input-wrapper {
+    background-color: #070c18;
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .input-wrapper:focus-within {
+    border-color: #5faeff;
+    box-shadow: 0 0 0 3px rgba(95, 174, 255, 0.2);
+}
+
+[data-theme="dark"] .vital-input-row input[type="number"] {
+    background-color: #070c18;
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #f8fafc;
+}
+
