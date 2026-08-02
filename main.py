@@ -1,4 +1,6 @@
 import os
+import json
+import re
 import requests
 from fastapi import FastAPI, HTTPException, File, UploadFile
 from fastapi.staticfiles import StaticFiles
@@ -33,6 +35,33 @@ groq_client = Groq(api_key=groq_key) if groq_key else None
 CUSTOM_MODEL_ID = "Iloriayomide/Symptom_Prediction"
 HF_INFERENCE_URL = f"https://api-inference.huggingface.co/models/{CUSTOM_MODEL_ID}"
 
+def extract_symptom_text(raw_text: str) -> tuple[str, str]:
+    """
+    Parses raw input (which may be a stringified JSON array of conversation history)
+    and returns a tuple of (clean_symptom_for_hf, full_context_for_llm).
+    """
+    clean_symptoms = raw_text
+    full_context = raw_text
+
+    try:
+        data = json.loads(raw_text)
+        if isinstance(data, list) and len(data) > 0:
+            user_messages = [msg for msg in data if isinstance(msg, dict) and msg.get("role") == "user"]
+            if user_messages:
+                last_user_content = user_messages[-1].get("content", "")
+            else:
+                last_user_content = str(data[-1])
+            
+            full_context = last_user_content
+            clean_symptoms = re.sub(r'\[Patient Details:.*?\]', '', last_user_content).strip()
+    except (json.JSONDecodeError, TypeError):
+        clean_symptoms = re.sub(r'\[Patient Details:.*?\]', '', raw_text).strip()
+
+    if not clean_symptoms:
+        clean_symptoms = raw_text
+
+    return clean_symptoms, full_context
+
 def query_huggingface_model(raw_text: str):
     """
     Queries Hugging Face's free Serverless Inference API for disease predictions.
@@ -51,7 +80,6 @@ def query_huggingface_model(raw_text: str):
         )
         if response.status_code == 200:
             data = response.json()
-            # Standard HF text-classification returns [[{'label': '...', 'score': 0.9}, ...]]
             if isinstance(data, list) and len(data) > 0 and isinstance(data[0], list):
                 return [
                     {
@@ -70,6 +98,8 @@ def query_huggingface_model(raw_text: str):
                 ]
         elif response.status_code == 503:
             print("HF Model loading... returning baseline prediction.")
+        else:
+            print(f"HF Inference API returned status {response.status_code}: {response.text}")
     except Exception as err:
         print(f"HF Inference API Notice: {err}")
 
@@ -93,10 +123,11 @@ def perform_triage(raw_text: str):
             detail="GEMINI_API_KEY missing in environment variables. Please set it in your host environment."
         )
 
-    predictions = query_huggingface_model(raw_text)
+    clean_symptom, full_context = extract_symptom_text(raw_text)
+    predictions = query_huggingface_model(clean_symptom)
 
     prompt = (
-        f"USER SYMPTOMS: {raw_text}\n"
+        f"USER SYMPTOMS: {full_context}\n"
         f"AI ANALYSIS: {predictions}\n\n"
         "ACT AS: A Supportive Health Assistant.\n"
         "TASK: Provide a response in simple, non-medical language.\n"
@@ -109,22 +140,36 @@ def perform_triage(raw_text: str):
         "<hr><p><small><em>DISCLAIMER: This is an AI tool and not a substitute for a human doctor.</em></small></p>"
     )
 
-    try:
-        response = client.models.generate_content(
-            model="gemini-3-flash-preview",
-            contents=prompt
-        )
-    except errors.ClientError as e:
-        if e.code == 429:
-            print("Gemini 3 limit reached. Executing fallback to Gemini 2.5 Flash...")
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
+    # Multi-tier Gemini model fallback chain: 3.6 -> 3.5 -> 2.5 -> 3-preview
+    GEMINI_MODELS = [
+        "gemini-3.6-flash",
+        "gemini-3.5-flash",
+        "gemini-2.5-flash",
+        "gemini-3-flash-preview"
+    ]
+
+    response_text = None
+    last_exception = None
+
+    for model_name in GEMINI_MODELS:
+        try:
+            res = client.models.generate_content(
+                model=model_name,
                 contents=prompt
             )
-        else:
-            raise e
+            if res and res.text:
+                response_text = res.text
+                break
+        except Exception as e:
+            print(f"Gemini model '{model_name}' unavailable or failed: {e}. Trying next model...")
+            last_exception = e
 
-    return predictions, response.text
+    if not response_text:
+        if last_exception:
+            raise last_exception
+        raise HTTPException(status_code=500, detail="All Gemini model fallbacks failed to respond.")
+
+    return predictions, response_text
 
 
 @app.post("/predict")
