@@ -45,6 +45,8 @@ async def log_requests(request: Request, call_next):
 gemini_key = os.getenv("GEMINI_API_KEY")
 groq_key = os.getenv("GROQ_API_KEY")
 hf_token = os.getenv("HF_TOKEN")
+if hf_token:
+    hf_token = hf_token.strip().strip('"').strip("'")
 
 if not hf_token:
     logger.warning("HF_TOKEN environment variable is missing. Hugging Face requests may be unauthorized or rate limited.")
@@ -56,8 +58,7 @@ groq_client = Groq(api_key=groq_key) if groq_key else None
 CUSTOM_MODEL_ID = "Iloriayomide/Symptom_Prediction"
 HF_ENDPOINTS = [
     f"https://router.huggingface.co/hf-inference/v1/models/{CUSTOM_MODEL_ID}",
-    f"https://router.huggingface.co/hf-inference/models/{CUSTOM_MODEL_ID}",
-    f"https://api-inference.huggingface.co/models/{CUSTOM_MODEL_ID}"
+    f"https://router.huggingface.co/hf-inference/models/{CUSTOM_MODEL_ID}"
 ]
 
 def extract_symptom_text(raw_text: str) -> tuple[str, str]:
@@ -138,6 +139,13 @@ def query_huggingface_model(raw_text: str):
                     else:
                         logger.warning(f"HF Inference API response format unexpected from {url}: {data}")
 
+                elif response.status_code == 401:
+                    logger.error(
+                        f"HF Inference API returned 401 Unauthorized for {url}: {response.text}. "
+                        "HF_TOKEN in Render Environment Variables is invalid or lacks Serverless Inference permissions on Hugging Face. "
+                        "To resolve this, generate a valid User Access Token at https://huggingface.co/settings/tokens with 'Make calls to the Serverless Inference API' permission."
+                    )
+                    break
                 elif response.status_code == 503:
                     logger.warning(f"HF Model cold start / loading (503) on attempt {attempt}/3 for {url}. Response text: {response.text}")
                     if attempt < 3:
