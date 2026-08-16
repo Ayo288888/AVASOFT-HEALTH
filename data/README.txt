@@ -1,11 +1,11 @@
 ================================================================================
-PAN-AFRICAN & GLOBAL CLINICAL DIFFERENTIAL DIAGNOSIS DATASET (1.18M RECORDS)
-AVASOFT-HEALTH Master Harmonized Clinical Dataset
+AfroCare-Dx: Harmonized Pan-African & Multi-Source Clinical Triage Dataset
+(1.18 Million Records - AVASOFT-HEALTH Release)
 ================================================================================
 
 Overview:
 ---------
-This dataset is a large-scale, harmonized multi-source clinical dataset designed 
+AfroCare-Dx is a large-scale, harmonized multi-source clinical dataset designed 
 for training and evaluating Automatic Symptom Detection (ASD), Clinical Triage, 
 and Differential Diagnosis (AD) artificial intelligence systems.
 
@@ -17,6 +17,7 @@ It combines 4 diverse medical datasets into a unified 4-column canonical schema:
 
 Dataset Statistics:
 -------------------
+- Dataset Name:                 AfroCare-Dx
 - Total Raw Input Pool:         1,308,398 records
 - Exact MD5 Duplicates Removed: 127,409 records (9.74% deduplication rate)
 - Final Unique Master Size:     1,180,989 records
@@ -53,3 +54,4 @@ Contact & Repository:
 ---------------------
 Repository: https://github.com/Ayo288888/AVASOFT-HEALTH
 Project: AVASOFT-HEALTH Pan-African Medical AI Engine
+Dataset Identifier: AfroCare-Dx (1.18M)
