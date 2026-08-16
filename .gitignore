@@ -4,3 +4,10 @@ __pycache__/
 venv/
 .DS_Store
 models/archive/
+data/DDXPlus/
+data/Afrimed/
+data/Final_Augmented_dataset_Diseases_and_Symptoms.csv
+data/canonical/
+data/combined_dataset.csv
+data/combined_dataset.jsonl
+scratch/

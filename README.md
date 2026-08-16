@@ -1,5 +1,5 @@
 ---
-title: Healthcare Chatbot
+title: AVASOFT-HEALTH Clinical Engine & Master Dataset
 emoji: 🩺
 colorFrom: blue
 colorTo: green
@@ -9,82 +9,90 @@ app_file: app.py
 pinned: false
 ---
 
-# AI Multi-Agent Healthcare System (Healthcare Chatbot)
-This project is an AI-powered health assistant that analyzes user-described symptoms to predict potential diseases and gives medical advice and suggestions. It uses a multi-modal FastAPI triage engine that combines a custom Hugging Face classification model developed by Ilori Ayomide (`Iloriayomide/Symptom_Prediction`) and Google Gemini / Groq Whisper models to deliver instant, voice-enabled patient care via a lightweight web UI.
+# 🩺 AVASOFT-HEALTH: AI Multi-Agent Pan-African Medical Triage Engine
+
+**AVASOFT-HEALTH** is an end-to-end multi-agent clinical decision support engine designed for low-resource primary healthcare triage across Pan-African and global healthcare settings. It combines a Stage 1 multi-label neural classifier (DeBERTa-v3-large) with a Stage 2 WHO/NCDC-grounded clinical LLM reasoning engine.
+
+---
+
+## 📊 Master Pan-African & Global Clinical Dataset (1.18M Records)
+
+We release a harmonized, multi-source medical dataset containing **1,180,989 unique deduplicated records** across 1,308,398 raw clinical encounters for public research and model training.
+
+### 📁 Dataset Files & Documentation
+- **Dataset Documentation:** [`data/README.txt`](file:///c:/Users/wisdo/OneDrive/Documents/GitHub/AVASOFT-HEALTH/data/README.txt)
+- **Dataset License & Provenance:** [`data/LICENSES.md`](file:///c:/Users/wisdo/OneDrive/Documents/GitHub/AVASOFT-HEALTH/data/LICENSES.md)
+- **Master Dataset File (CSV):** `data/combined_dataset.csv` *(1,180,989 rows)*
+- **Master Dataset File (JSONL):** `data/combined_dataset.jsonl` *(1,180,989 records)*
+
+### 📈 Dataset Sources & Composition
+
+| Source Tag | Source Name | Uncapped Record Count | Primary Content Description |
+| :--- | :--- | :--- | :--- |
+| **`ddxplus`** | DDXPlus (NeurIPS 2022) | **1,025,602** | Decoded clinical EHR symptom histories |
+| **`kaggle773`** | Kaggle 773 Diseases & Symptoms | **246,945** | Binary symptom vector chief complaints |
+| **`symcat`** | SymCAT Probabilistic Pipeline | **20,576** | Probabilistic condition presentations across 801 diseases |
+| **`afrimedqa`** | AfriMed-QA v2 (Intron Health Phase 2) | **15,275** | Pan-African clinical Q&A & consumer queries (18 nations) |
+
+### 🛠️ Schema Contract
+Every record in `data/combined_dataset.csv` follows the standardized 4-column canonical schema:
+1. `id` *(String)*: Unique record identifier (e.g. `DDX_0000001`, `KAG_000001`, `AFR_000001`, `SYM_000001`).
+2. `text` *(String)*: Natural English clinical complaint, patient symptom history, or prompt.
+3. `labels` *(String)*: Pipe-delimited target pathology or medical specialty (`label1|label2`).
+4. `source` *(String)*: Data provenance tag (`ddxplus`, `kaggle773`, `afrimedqa`, `symcat`).
+
+### ☁️ Downloading the Full Master Dataset
+Due to GitHub file size limits (>100MB), the full 1.18M master CSV (`combined_dataset.csv`, ~250MB) is hosted on Google Drive:
+- 🔗 **Google Drive Direct Download Link:** *(User Google Drive Link Placeholder)*
+- 🐙 **Git LFS Tracked:** Configured via `.gitattributes` for Git Large File Storage.
+
+To generate the dataset locally from scratch, run:
+```bash
+python scripts/build_canonical_datasets.py
+python scripts/deduplicate_and_combine.py
+```
+
+---
 
 ## 🚀 Key Features
 
-* **Multi-Agent Orchestration:** Uses a custom Hugging Face neural network developed by me (`Iloriayomide/Symptom_Prediction`) for rapid baseline classification, then passes the tensor outputs to Google's Gemini for natural language clinical reasoning.
-* **Voice-Activated Triage:** Integrates Groq's ultra-fast `whisper-large-v3` model, allowing patients to simply speak their symptoms instead of typing.
-* * **Image Upload ** Integrates Adejare's custom model, allowing patients to upload images for futher diagnosis.
-  * Top-K Predictions: Returns the top 3 most likely disease matches with confidence percentages.
-  * Natural Language Processing: Accepts full-sentence descriptions of symptoms (e.g., "I have a high fever and severe headache").
+* **Multi-Agent Orchestration:** Uses a Stage 1 multi-label classifier (`DeBERTa-v3-large`) for top-3 differential diagnosis logit estimation, then grounds Stage 2 LLM generation using WHO AFRO & NCDC clinical guidelines.
+* **Voice-Activated Triage:** Integrates Groq's ultra-fast `whisper-large-v3` model, allowing patients to speak their symptoms.
+* **Out-of-Distribution (OOD) Safety:** Computes Shannon entropy on Stage 1 probability distributions to flag rare or non-medical inputs safely.
 
-## 🧠 The Tech Stack
-* **Backend:** FastAPI, Python, Uvicorn (Asynchronous REST API)
-* **Local Machine Learning:** Hugging Face `transformers`, PyTorch
-* **Cloud Intelligence:** Google GenAI SDK (Gemini 3 / 2.5), Groq Cloud (Whisper v3)
-* **Security:** `python-dotenv` for strict environment variable isolation
+---
 
-🛠️ Tech Stack
-Python 3.11+
+## 🧠 Tech Stack
+* **Language & Frameworks:** Python 3.11+, PyTorch, Hugging Face `transformers`, FastAPI
+* **Speech Recognition:** Groq Cloud (`whisper-large-v3`)
+* **LLM Engine:** Google Gemini / Groq LLaMA-3.3-70B
 
-Backend: FastAPI
+---
 
-ML Engine: Hugging Face Transformers & PyTorch
+## 📦 Installation & Setup
 
-Server: Uvicorn
+1. **Clone the Repository:**
+```bash
+git clone https://github.com/Ayo288888/AVASOFT-HEALTH.git
+cd AVASOFT-HEALTH
+```
 
-Frontend: HTML5, CSS3, JavaScript (Fetch API)
-
-📦 Installation & Setup
-1. Clone the Repository
-Bash
-
-git clone <your-repo-url>
-cd healthcare-chatbot
-2. Install Dependencies
-Install the required Python packages listed in requirements.txt:
-
-Bash
-
+2. **Install Dependencies:**
+```bash
 pip install -r requirements.txt
-Dependencies include: fastapi, uvicorn, transformers, torch, and pydantic.
+```
 
-3. Run the Backend Server
-Start the FastAPI server using Uvicorn. This will download the model the first time you run it.
-
-Bash
-
+3. **Run Backend Server:**
+```bash
 uvicorn main:app --reload
-The API will start at http://127.0.0.1:8000.
+```
 
-The model Iloriayomide/my-symptom-checker-biobert will be cached locally.
+4. **Run Unit Verification:**
+```bash
+python scratch/run_tests.py
+```
 
-4. Launch the Frontend
-Simply open the index.html file in your web browser.
+---
 
-You can double-click the file in your file explorer.
-
-The frontend is pre-configured to send requests to http://127.0.0.1:8000/predict.
-
-🚀 Usage
-Ensure the backend terminal shows Application startup complete.
-
-Open index.html in your browser.
-
-Type your symptoms into the text area (e.g., "I am feeling dizzy and have a stomach ache").
-
-Click "Analyze Symptoms".
-
-View the top 3 predicted conditions and their confidence scores.
-
-
-⚠️ Important Disclaimer
-This is an Artificial Intelligence project for educational and demonstration purposes only.
-
-It is not a doctor and should not be used for medical diagnosis.
-
-The predictions are based on statistical patterns in text and may be inaccurate.
-
-Always consult a certified medical professional for health advice.
+## ⚠️ Important Disclaimer
+This project is for educational and research demonstration purposes only. It is not a certified medical device and should not replace professional clinical diagnosis. Always consult a certified healthcare professional.
