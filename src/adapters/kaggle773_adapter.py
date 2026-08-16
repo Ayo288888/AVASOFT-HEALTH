@@ -10,11 +10,17 @@ from src.adapters.base_adapter import validate_canonical_record
 
 def process_kaggle773_csv(csv_path: str, out_jsonl_path: str, limit: int = 50000) -> int:
     """Reads Kaggle 773 CSV, converts symptom matrices to text, and exports canonical JSONL."""
-    if not Path(csv_path).exists():
-        print(f"Warning: Raw file {csv_path} not found.")
-        return 0
+    csv_p = Path(csv_path)
+    if not csv_p.exists():
+        # Fallback check for root data/ directory
+        alt_path = Path("data/Final_Augmented_dataset_Diseases_and_Symptoms.csv")
+        if alt_path.exists():
+            csv_p = alt_path
+        else:
+            print(f"Warning: Raw file {csv_path} not found.")
+            return 0
         
-    df = pd.read_csv(csv_path)
+    df = pd.read_csv(csv_p)
     disease_col = df.columns[0]
     symptom_cols = df.columns[1:]
     
