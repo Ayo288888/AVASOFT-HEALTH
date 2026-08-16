@@ -38,11 +38,10 @@ def clean_evidence_phrase(ev_code_val: str, evidence_map: dict) -> str:
             return ev_info.get("question_en", ev_code_val).rstrip("?")
         return ev_code_val
 
-def process_ddxplus_csv(csv_path: str, out_jsonl_path: str, limit: int = 50000) -> int:
+def process_ddxplus_csv(csv_path: str, out_jsonl_path: str, limit: int = None) -> int:
     """Reads raw DDXPlus CSV, decodes evidence codes into clinical sentences, and exports canonical JSONL."""
     csv_p = Path(csv_path)
     if not csv_p.exists():
-        # Fallback check for manual data/DDXPlus path
         alt_path = Path("data/DDXPlus/release_train_patients/release_train_patients")
         if alt_path.exists():
             csv_p = alt_path
@@ -50,7 +49,6 @@ def process_ddxplus_csv(csv_path: str, out_jsonl_path: str, limit: int = 50000) 
             print(f"Warning: Raw file {csv_path} not found.")
             return 0
             
-    # Locate release_evidences.json
     ev_json_path = csv_p.parent.parent / "release_evidences.json"
     if not ev_json_path.exists():
         ev_json_path = Path("data/DDXPlus/release_evidences.json")
@@ -65,7 +63,7 @@ def process_ddxplus_csv(csv_path: str, out_jsonl_path: str, limit: int = 50000) 
     count = 0
     with open(out_jsonl_path, "w", encoding="utf-8") as f:
         for idx, row in df.iterrows():
-            if idx >= limit:
+            if limit is not None and idx >= limit:
                 break
             age = row.get("AGE", "adult")
             sex = "male" if str(row.get("SEX", "M")).upper() == "M" else "female"
