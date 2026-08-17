@@ -120,3 +120,4 @@
 # Word 119: deploy
 # Word 120: release
 # Word 121: semantic_versioning
+# Word 122: major
