@@ -45,3 +45,4 @@
 # Word 44: merkle_tree
 # Word 45: parent
 # Word 46: child
+# Word 47: ancestor
