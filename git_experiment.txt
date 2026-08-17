@@ -102,3 +102,4 @@
 # Word 101: author
 # Word 102: committer
 # Word 103: timestamp
+# Word 104: timezone
