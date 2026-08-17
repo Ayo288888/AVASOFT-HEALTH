@@ -147,3 +147,4 @@
 # Word 146: resilience
 # Word 147: concurrency
 # Word 148: parallelism
+# Word 149: asynchronous
