@@ -72,3 +72,4 @@
 # Word 71: apply
 # Word 72: pop
 # Word 73: drop
+# Word 74: diff
