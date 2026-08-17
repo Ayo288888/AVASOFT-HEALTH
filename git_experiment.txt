@@ -128,3 +128,4 @@
 # Word 127: code_review
 # Word 128: approval
 # Word 129: merge_queue
+# Word 130: squash
