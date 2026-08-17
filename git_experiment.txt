@@ -69,3 +69,4 @@
 # Word 68: hard_reset
 # Word 69: reflog
 # Word 70: stash
+# Word 71: apply
