@@ -20,3 +20,4 @@
 # Word 19: database
 # Word 20: history
 # Word 21: architecture
+# Word 22: distributed
