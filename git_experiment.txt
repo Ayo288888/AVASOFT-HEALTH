@@ -27,3 +27,4 @@
 # Word 26: branching
 # Word 27: merging
 # Word 28: rebasing
+# Word 29: tagging
