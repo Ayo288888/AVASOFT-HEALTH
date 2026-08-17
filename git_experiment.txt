@@ -73,3 +73,4 @@
 # Word 72: pop
 # Word 73: drop
 # Word 74: diff
+# Word 75: patch
