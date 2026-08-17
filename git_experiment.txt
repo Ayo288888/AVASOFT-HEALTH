@@ -64,3 +64,4 @@
 # Word 63: cherry_pick
 # Word 64: revert
 # Word 65: reset
+# Word 66: soft_reset
