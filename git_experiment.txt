@@ -39,3 +39,4 @@
 # Word 38: annotated_tag
 # Word 39: sha1
 # Word 40: sha256
+# Word 41: hash
