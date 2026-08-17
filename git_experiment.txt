@@ -75,3 +75,4 @@
 # Word 74: diff
 # Word 75: patch
 # Word 76: blame
+# Word 77: log
