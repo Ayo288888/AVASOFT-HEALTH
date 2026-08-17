@@ -126,3 +126,4 @@
 # Word 125: changelog
 # Word 126: pull_request
 # Word 127: code_review
+# Word 128: approval
