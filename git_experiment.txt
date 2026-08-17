@@ -76,3 +76,4 @@
 # Word 75: patch
 # Word 76: blame
 # Word 77: log
+# Word 78: bisect
