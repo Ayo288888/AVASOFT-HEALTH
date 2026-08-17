@@ -105,3 +105,4 @@
 # Word 104: timezone
 # Word 105: gpg_signature
 # Word 106: verified
+# Word 107: signed_commit
