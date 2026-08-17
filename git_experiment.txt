@@ -95,3 +95,4 @@
 # Word 94: prune
 # Word 95: fsck
 # Word 96: compression
+# Word 97: delta_compression
