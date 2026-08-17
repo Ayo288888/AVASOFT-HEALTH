@@ -104,3 +104,4 @@
 # Word 103: timestamp
 # Word 104: timezone
 # Word 105: gpg_signature
+# Word 106: verified
