@@ -80,3 +80,4 @@
 # Word 79: submodule
 # Word 80: subtree
 # Word 81: hook
+# Word 82: pre_commit
