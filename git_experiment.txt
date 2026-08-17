@@ -127,3 +127,4 @@
 # Word 126: pull_request
 # Word 127: code_review
 # Word 128: approval
+# Word 129: merge_queue
