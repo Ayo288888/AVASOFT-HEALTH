@@ -96,3 +96,4 @@
 # Word 95: fsck
 # Word 96: compression
 # Word 97: delta_compression
+# Word 98: zlib
