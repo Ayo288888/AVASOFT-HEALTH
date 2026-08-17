@@ -70,3 +70,4 @@
 # Word 69: reflog
 # Word 70: stash
 # Word 71: apply
+# Word 72: pop
