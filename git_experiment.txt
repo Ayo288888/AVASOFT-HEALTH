@@ -21,3 +21,4 @@
 # Word 20: history
 # Word 21: architecture
 # Word 22: distributed
+# Word 23: version
