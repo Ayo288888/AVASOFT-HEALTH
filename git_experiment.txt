@@ -119,3 +119,4 @@
 # Word 118: lint
 # Word 119: deploy
 # Word 120: release
+# Word 121: semantic_versioning
