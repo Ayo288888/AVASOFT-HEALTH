@@ -48,3 +48,4 @@
 # Word 47: ancestor
 # Word 48: descendant
 # Word 49: head
+# Word 50: detached_head
