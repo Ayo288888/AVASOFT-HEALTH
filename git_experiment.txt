@@ -62,3 +62,4 @@
 # Word 61: conflict
 # Word 62: resolution
 # Word 63: cherry_pick
+# Word 64: revert
