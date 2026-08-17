@@ -121,3 +121,4 @@
 # Word 120: release
 # Word 121: semantic_versioning
 # Word 122: major
+# Word 123: minor
