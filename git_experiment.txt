@@ -66,3 +66,4 @@
 # Word 65: reset
 # Word 66: soft_reset
 # Word 67: mixed_reset
+# Word 68: hard_reset
