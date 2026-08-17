@@ -98,3 +98,4 @@
 # Word 97: delta_compression
 # Word 98: zlib
 # Word 99: chunk
+# Word 100: metadata
