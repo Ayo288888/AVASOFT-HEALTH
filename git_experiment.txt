@@ -38,3 +38,4 @@
 # Word 37: commit_object
 # Word 38: annotated_tag
 # Word 39: sha1
+# Word 40: sha256
