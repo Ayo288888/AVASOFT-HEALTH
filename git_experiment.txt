@@ -68,3 +68,4 @@
 # Word 67: mixed_reset
 # Word 68: hard_reset
 # Word 69: reflog
+# Word 70: stash
