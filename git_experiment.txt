@@ -36,3 +36,4 @@
 # Word 35: blob
 # Word 36: tree_object
 # Word 37: commit_object
+# Word 38: annotated_tag
