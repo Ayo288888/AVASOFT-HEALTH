@@ -88,6 +88,52 @@ def extract_symptom_text(raw_text: str) -> tuple[str, str]:
 
     return clean_symptoms, full_context
 
+MAX_HISTORY_MESSAGES = 20  # bounds LLM token cost on long chats
+
+CHAT_SYSTEM_PROMPT = (
+    "You are AvaSoft Health, a warm, supportive health assistant continuing a conversation "
+    "with a patient. You already gave them an initial assessment earlier in this chat.\n"
+    "- Reply naturally in simple, non-medical language, in 2 to 5 short sentences.\n"
+    "- Answer what they actually asked. Do not repeat the full assessment unless they ask for it.\n"
+    "- If their symptoms are unclear or have changed, ask ONE short clarifying question.\n"
+    "- If they mention red-flag symptoms (chest pain, difficulty breathing, fainting, confusion, "
+    "heavy bleeding, seizures, signs of stroke), tell them to seek emergency care immediately.\n"
+    "- Never give exact prescription drug dosages. Remind them you are an AI, not a doctor, "
+    "when your advice could be acted on.\n"
+    "- Plain text only. No Markdown, no HTML."
+)
+
+
+def parse_conversation(raw_text: str) -> list[dict]:
+    """
+    Turns the frontend payload (a JSON array of chat messages, or plain text) into
+    [{"role": "user"|"assistant", "content": str}], oldest first.
+    """
+    try:
+        data = json.loads(raw_text)
+    except (json.JSONDecodeError, TypeError):
+        data = None
+    if not isinstance(data, list):
+        return [{"role": "user", "content": raw_text}]
+
+    messages = []
+    for msg in data:
+        if not isinstance(msg, dict):
+            continue
+        role = "user" if msg.get("role") == "user" else "assistant"
+        content = str(msg.get("content") or "")
+        if role == "assistant":
+            content = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", content)).strip()
+        if content:
+            messages.append({"role": role, "content": content})
+
+    messages = messages[-MAX_HISTORY_MESSAGES:]
+    # Both LLM APIs expect the chat to open with a user turn, so drop the greeting.
+    while messages and messages[0]["role"] == "assistant":
+        messages.pop(0)
+    return messages or [{"role": "user", "content": raw_text}]
+
+
 def query_huggingface_model(raw_text: str):
     """
     Queries Hugging Face's free Serverless Inference API for disease predictions.
@@ -201,10 +247,16 @@ def parse_llm_json_response(text: str) -> dict | None:
     return None
 
 
-def generate_llm_response(prompt: str) -> str:
+def generate_llm_response(messages: list[dict], system: str | None = None) -> str:
     """
-    Executes LLM generation with multi-tier Gemini fallback chain and optional Groq backup.
+    Executes LLM generation over a chat history ([{"role": "user"|"assistant", "content": str}])
+    with multi-tier Gemini fallback chain and optional Groq backup.
     """
+    gemini_contents = [
+        {"role": "model" if m["role"] == "assistant" else "user", "parts": [{"text": m["content"]}]}
+        for m in messages
+    ]
+    groq_messages = ([{"role": "system", "content": system}] if system else []) + messages
     GEMINI_MODELS = [
         "gemini-2.5-flash",
         "gemini-2.0-flash",
@@ -221,7 +273,8 @@ def generate_llm_response(prompt: str) -> str:
             try:
                 res = client.models.generate_content(
                     model=model_name,
-                    contents=prompt
+                    contents=gemini_contents,
+                    config={"system_instruction": system} if system else None
                 )
                 if res and res.text:
                     logger.info(f"Gemini generation succeeded with model: '{model_name}'")
@@ -234,8 +287,8 @@ def generate_llm_response(prompt: str) -> str:
         logger.info("Attempting fallback generation with Groq LLM...")
         try:
             chat_completion = groq_client.chat.completions.create(
-                messages=[{"role": "user", "content": prompt}],
-                model="llama-3.3-70b-versatile",
+                messages=groq_messages,
+                model="openai/gpt-oss-120b",
             )
             if chat_completion.choices and chat_completion.choices[0].message.content:
                 logger.info("Groq LLM generation succeeded.")
@@ -264,6 +317,11 @@ def perform_triage(raw_text: str):
             detail="LLM API key missing in environment variables. Please set GEMINI_API_KEY or GROQ_API_KEY."
         )
 
+    conversation = parse_conversation(raw_text)
+    if any(m["role"] == "assistant" for m in conversation):
+        logger.info(f"Follow-up turn ({len(conversation)} messages). Generating conversational reply.")
+        return [], generate_llm_response(conversation, system=CHAT_SYSTEM_PROMPT)
+
     clean_symptom, full_context = extract_symptom_text(raw_text)
     predictions = query_huggingface_model(clean_symptom)
 
@@ -287,14 +345,14 @@ def perform_triage(raw_text: str):
             '    {"condition": "Secondary Condition", "confidence": "70.0%"},\n'
             '    {"condition": "Differential Diagnosis", "confidence": "55.0%"}\n'
             "  ],\n"
-            '  "doctor_note": "<h4>🩺 Assessment</h4><p>[Explain what might be happening based on symptoms]</p><h4>🩹 Immediate Relief</h4><ul><li>[Step 1]</li><li>[Step 2]</li></ul><h4>💊 Pharmacy Advice</h4><p>[What to ask a pharmacist for]</p><h4>🚨 RED FLAGS (When to see a doctor)</h4><ul><li>[Warning sign 1]</li></ul><hr><p><small><em>DISCLAIMER: This is an AI tool and not a substitute for a human doctor.</em></small></p>"\n'
+            '  "doctor_note": "<h4>🩺 Assessment</h4><p>[Explain what might be happening based on symptoms]</p><h4>🩹 Immediate Relief</h4><ul><li>[Step 1]</li><li>[Step 2]</li></ul><h4>💊 Pharmacy Advice</h4><p>[What to ask a pharmacist for]</p><h4>🚨 RED FLAGS (When to see a doctor)</h4><ul><li>[Warning sign 1]</li></ul><h4>❓ One Question</h4><p>[One short follow-up question that would help narrow things down]</p><hr><p><small><em>DISCLAIMER: This is an AI tool and not a substitute for a human doctor.</em></small></p>"\n'
             "}\n\n"
             "CRITICAL INSTRUCTIONS:\n"
             "1. 'top_predictions' must be an array of top 3 suspected medical conditions with realistic confidence percentages based on the patient's symptoms (formatted as 'XX.X%').\n"
-            "2. 'doctor_note' must be clean HTML formatted response with Assessment, Immediate Relief, Pharmacy Advice, Red Flags, and Disclaimer. DO NOT use Markdown asterisks (**).\n"
+            "2. 'doctor_note' must be clean HTML formatted response with Assessment, Immediate Relief, Pharmacy Advice, Red Flags, one follow-up question, and Disclaimer. DO NOT use Markdown asterisks (**).\n"
         )
 
-        response_text = generate_llm_response(fallback_prompt)
+        response_text = generate_llm_response([{"role": "user", "content": fallback_prompt}])
         parsed = parse_llm_json_response(response_text)
 
         if parsed and isinstance(parsed, dict) and "top_predictions" in parsed and "doctor_note" in parsed:
@@ -327,10 +385,11 @@ def perform_triage(raw_text: str):
             "<h4>🩹 Immediate Relief</h4><ul><li>[Step 1]</li><li>[Step 2]</li></ul>\n"
             "<h4>💊 Pharmacy Advice</h4><p>[What to ask a pharmacist for]</p>\n"
             "<h4>🚨 RED FLAGS (When to see a doctor)</h4><ul><li>[Warning sign 1]</li></ul>\n"
+            "<h4>❓ One Question</h4><p>[One short follow-up question that would help narrow things down]</p>\n"
             "<hr><p><small><em>DISCLAIMER: This is an AI tool and not a substitute for a human doctor.</em></small></p>"
         )
 
-        response_text = generate_llm_response(prompt)
+        response_text = generate_llm_response([{"role": "user", "content": prompt}])
         return predictions, response_text
 
 
