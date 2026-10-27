@@ -556,7 +556,8 @@ async function initiateScan() {
             const severityVal = document.getElementById("severity").value;
             const vitalsContext = ` [Patient Details: Age=${patientProfile.age}, Blood=${patientProfile.blood}, Allergies=${patientProfile.allergies}, Temp=${tempVal}°C, PainSeverity=${severityVal}/10]`;
             
-            conversationHistory.push({ role: "user", content: textInput + vitalsContext });
+            // appendMessage() already pushed this user turn; attach vitals instead of sending it twice
+            conversationHistory[conversationHistory.length - 1].content += vitalsContext;
             
             response = await fetch('/predict', { 
                 method: 'POST', 
