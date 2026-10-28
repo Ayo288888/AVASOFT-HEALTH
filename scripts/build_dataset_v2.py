@@ -24,6 +24,7 @@ from scripts.build_label_map import load_conditions, target_for
 
 CAP_PER_CONDITION = 5_000  # stops DDXPlus respiratory classes (131k common-cold rows) swamping the rest
 CAP_OTHER = 20_000
+CAP_PER_OTHER_DISEASE = 500  # Roseola alone was 17% of OTHER, teaching "fever + rash = OTHER" next to thin measles
 # Natural patient text first, templated symptom lists last.
 SOURCE_PRIORITY = ["symptom2disease", "synthetic", "afrimedqa_seed", "zenodo_infectious", "kaggle773", "ddxplus"]
 
@@ -40,11 +41,14 @@ def drop_duplicates_and_conflicts(df: pd.DataFrame) -> pd.DataFrame:
     return df[~conflicting].loc[~h[~conflicting].duplicated()]
 
 
-def cap_per_label(df: pd.DataFrame, caps: dict, seed: int) -> pd.DataFrame:
+def cap_per_label(df: pd.DataFrame, caps: dict, seed: int,
+                  cap_per_other_disease: int = CAP_PER_OTHER_DISEASE) -> pd.DataFrame:
     rank = {s: i for i, s in enumerate(SOURCE_PRIORITY)}
     shuffled = df.sample(frac=1, random_state=seed)
     shuffled = shuffled.assign(_p=shuffled["source"].map(rank).fillna(len(rank)))
     ordered = shuffled.sort_values("_p", kind="stable").drop(columns="_p")
+    disease_rank = ordered.groupby(["label", ordered["original_label"].str.lower()]).cumcount()
+    ordered = ordered[(ordered["label"] != "OTHER") | (disease_rank < cap_per_other_disease)]
     limit = ordered["label"].map(caps).fillna(len(ordered))
     return ordered[ordered.groupby("label").cumcount() < limit]
 
@@ -70,19 +74,20 @@ def load_sources(data: Path, generated: Path) -> pd.DataFrame:
     for chunk in pd.read_csv(data / "combined_dataset.csv", usecols=["id", "text", "labels", "source"],
                              chunksize=200_000, dtype=str):
         chunk = chunk.dropna(subset=["text", "labels"])
-        chunk["label"] = [target_for(s, l.split("|")[0].strip()) for s, l in zip(chunk["source"], chunk["labels"])]
-        frames.append(chunk[chunk["label"].isin(keep)][["id", "text", "label", "source"]])
+        chunk["original_label"] = chunk["labels"].str.split("|").str[0].str.strip()
+        chunk["label"] = [target_for(s, l) for s, l in zip(chunk["source"], chunk["original_label"])]
+        frames.append(chunk[chunk["label"].isin(keep)][["id", "text", "label", "source", "original_label"]])
 
     for name in ("symptom2disease", "zenodo_infectious", "afrimedqa_seed"):
         recs = [json.loads(line) for line in open(data / "canonical" / f"{name}.jsonl", encoding="utf-8")]
-        df = pd.DataFrame([{"id": r["id"], "text": r["text"], "source": r["source"],
+        df = pd.DataFrame([{"id": r["id"], "text": r["text"], "source": r["source"], "original_label": r["labels"][0],
                             "label": target_for(r["source"], r["labels"][0])} for r in recs])
         frames.append(df[df["label"].isin(keep)])
 
     gen = pd.read_csv(generated, dtype=str).fillna("")
     frames.append(pd.DataFrame({
         "id": [f"GEN_{i:05d}" for i in range(len(gen))],
-        "text": gen["text"], "label": gen["condition"], "source": "synthetic",
+        "text": gen["text"], "label": gen["condition"], "source": "synthetic", "original_label": gen["condition"],
     }))
 
     df = pd.concat(frames, ignore_index=True)
@@ -107,7 +112,7 @@ def main():
     df = split(cap_per_label(df, caps, args.seed), args.seed)
 
     out = data / "afrocare_dx_v2.csv"
-    df[["id", "text", "label_id", "label", "source", "reviewed", "split"]].to_csv(out, index=False, encoding="utf-8")
+    df[["id", "text", "label_id", "label", "original_label", "source", "reviewed", "split"]].to_csv(out, index=False, encoding="utf-8")
     print(f"Wrote {len(df):,} rows to {out}")
     print("\nRows per split:", df["split"].value_counts().to_dict())
     print("Rows per source:", df["source"].value_counts().to_dict())

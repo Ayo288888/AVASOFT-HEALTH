@@ -10,7 +10,8 @@ from scripts.build_dataset_v2 import cap_per_label, drop_duplicates_and_conflict
 
 
 def frame(rows):
-    return pd.DataFrame(rows, columns=["id", "text", "label", "source"])
+    df = pd.DataFrame(rows, columns=["id", "text", "label", "source"])
+    return df.assign(original_label=df["label"])
 
 
 class TestDuplicates(unittest.TestCase):
@@ -39,7 +40,14 @@ class TestCap(unittest.TestCase):
         out = cap_per_label(df, {"Pneumonia": 2}, seed=1)
         self.assertEqual(len(out), 2)
         self.assertIn("s0", set(out["id"]))  # natural text is kept before templated rows
-        self.assertEqual(list(out.columns), ["id", "text", "label", "source"])  # split() needs label
+        self.assertEqual(list(out.columns), ["id", "text", "label", "source", "original_label"])  # split() needs label
+
+    def test_no_single_disease_dominates_other(self):
+        df = frame([(f"r{i}", f"rash {i}", "OTHER", "kaggle773") for i in range(10)]
+                   + [(f"p{i}", f"pain {i}", "OTHER", "kaggle773") for i in range(3)])
+        df["original_label"] = ["Roseola"] * 10 + ["acute pancreatitis"] * 3
+        out = cap_per_label(df, {"OTHER": 100}, seed=1, cap_per_other_disease=4)
+        self.assertEqual(out["original_label"].value_counts().to_dict(), {"Roseola": 4, "acute pancreatitis": 3})
 
 
 class TestSplit(unittest.TestCase):
