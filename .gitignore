@@ -10,4 +10,5 @@ data/Final_Augmented_dataset_Diseases_and_Symptoms.csv
 data/canonical/
 data/combined_dataset.csv
 data/combined_dataset.jsonl
-scratch/
+scratch/data/raw/symptom2disease/
+data/raw/zenodo_infectious/

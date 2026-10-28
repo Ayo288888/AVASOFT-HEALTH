@@ -1,0 +1,925 @@
+{
+  "_note": "Symptom profiles used to generate synthetic patient-voice cases. Drafted from WHO fact sheets and AfriMed-QA clinician seeds. MUST be reviewed by a Nigerian clinician before generated cases are used for training. leak_terms are case-insensitive substrings that disqualify a generated case. required_clues: a generated case must contain at least one substring from every group.",
+  "C01": {
+    "narrator": "adult describing own symptoms, or parent describing a child",
+    "key_symptoms": [
+      "fever, often worse in the evening or at night",
+      "chills or shivering",
+      "sweating",
+      "headache",
+      "body and joint pains",
+      "weakness",
+      "loss of appetite",
+      "bitter taste in the mouth",
+      "nausea or vomiting"
+    ],
+    "red_flags": [],
+    "context": [
+      "sleeps without a mosquito net",
+      "rainy season",
+      "lives near stagnant water"
+    ],
+    "leak_terms": [
+      "malaria",
+      "maleria",
+      "plasmodium",
+      "falciparum"
+    ],
+    "source": "https://www.who.int/news-room/fact-sheets/detail/malaria",
+    "required_clues": [
+      [
+        "fever",
+        "hot",
+        "temperature",
+        "feverish"
+      ],
+      [
+        "night",
+        "evening",
+        "shiver",
+        "chill",
+        "cold",
+        "sweat",
+        "bitter",
+        "mosquito",
+        " net"
+      ]
+    ]
+  },
+  "C02": {
+    "narrator": "parent or caregiver describing a child under 5, or a relative describing a pregnant woman",
+    "key_symptoms": [
+      "very high fever",
+      "confusion or not responding normally",
+      "convulsions",
+      "cannot sit up, drink or breastfeed",
+      "extreme weakness",
+      "very pale palms and eyes",
+      "dark, cola-coloured urine",
+      "fast or difficult breathing",
+      "drowsy and hard to wake"
+    ],
+    "red_flags": [
+      "convulsions",
+      "unconsciousness",
+      "difficult breathing"
+    ],
+    "context": [
+      "fever for several days treated at home or a chemist first",
+      "rainy season"
+    ],
+    "leak_terms": [
+      "malaria",
+      "maleria",
+      "cerebral",
+      "plasmodium"
+    ],
+    "source": "https://www.who.int/news-room/fact-sheets/detail/malaria",
+    "required_clues": [
+      [
+        "convuls",
+        "shak",
+        "fit",
+        "jerk",
+        "confus",
+        "unconscious",
+        "respond",
+        "wake",
+        "pale",
+        "white",
+        "coke",
+        "cola",
+        "dark urine",
+        "breath",
+        "drink",
+        "breastfeed",
+        "suck",
+        "drowsy",
+        "sit up"
+      ]
+    ]
+  },
+  "C03": {
+    "narrator": "adult or adolescent describing own symptoms, or parent describing a child",
+    "key_symptoms": [
+      "fever that rises gradually over several days and does not go away",
+      "stomach pain",
+      "constipation or diarrhoea",
+      "headache",
+      "weakness and tiredness",
+      "loss of appetite",
+      "coated tongue"
+    ],
+    "red_flags": [
+      "severe stomach pain",
+      "blood in stool",
+      "confusion"
+    ],
+    "context": [
+      "drinks well or borehole water",
+      "eats street food",
+      "malaria treatment did not help"
+    ],
+    "leak_terms": [
+      "typhoid",
+      "enteric",
+      "salmonella",
+      "widal"
+    ],
+    "source": "https://www.who.int/news-room/fact-sheets/detail/typhoid",
+    "required_clues": [
+      [
+        "fever",
+        "hot",
+        "temperature",
+        "feverish"
+      ],
+      [
+        "stomach",
+        "belle",
+        "belly",
+        "abdom",
+        "constipat",
+        "stool",
+        "diarr",
+        "tongue",
+        "running"
+      ]
+    ]
+  },
+  "C06": {
+    "narrator": "adult describing own symptoms, or relative describing a sick family member",
+    "key_symptoms": [
+      "fever that started gradually",
+      "general weakness and feeling unwell",
+      "headache",
+      "sore throat",
+      "muscle pain",
+      "chest pain",
+      "nausea, vomiting or diarrhoea",
+      "cough",
+      "stomach pain"
+    ],
+    "red_flags": [
+      "bleeding from the mouth, nose or gums",
+      "swelling of the face",
+      "not passing urine",
+      "confusion"
+    ],
+    "context": [
+      "rats in the house or food store",
+      "dry season, December to April",
+      "cared for a sick relative who had bleeding",
+      "malaria and typhoid treatment did not help"
+    ],
+    "leak_terms": [
+      "lassa",
+      "arenavirus",
+      "haemorrhagic fever",
+      "hemorrhagic fever",
+      "vhf"
+    ],
+    "source": "https://www.who.int/news-room/fact-sheets/detail/lassa-fever",
+    "required_clues": [
+      [
+        "bleed",
+        "blood",
+        "rat",
+        "face",
+        "swell",
+        "swollen",
+        "no urine",
+        "not passing urine",
+        "relative",
+        "caring for",
+        "treatment",
+        "nothing work"
+      ]
+    ]
+  },
+  "C07": {
+    "narrator": "adult describing own symptoms, or relative describing a family member",
+    "key_symptoms": [
+      "sudden fever",
+      "muscle pain, especially the back",
+      "headache",
+      "loss of appetite",
+      "nausea or vomiting",
+      "after a few days: yellow eyes or skin",
+      "dark urine",
+      "stomach pain"
+    ],
+    "red_flags": [
+      "bleeding from the mouth, nose or eyes",
+      "vomiting blood"
+    ],
+    "context": [
+      "never received the yellow card vaccine",
+      "lives in or travelled to a rural or forest area"
+    ],
+    "leak_terms": [
+      "yellow fever",
+      "flavivirus"
+    ],
+    "source": "https://www.who.int/news-room/fact-sheets/detail/yellow-fever",
+    "required_clues": [
+      [
+        "yellow"
+      ],
+      [
+        "fever",
+        "hot",
+        "temperature",
+        "feverish",
+        "back pain",
+        "bleed",
+        "vaccin",
+        "card"
+      ]
+    ]
+  },
+  "C08": {
+    "narrator": "adult describing own symptoms, or relative describing a family member or child",
+    "key_symptoms": [
+      "sudden, very large amounts of watery stool like rice water",
+      "vomiting",
+      "very thirsty",
+      "leg cramps",
+      "sunken eyes",
+      "passing little or no urine",
+      "weak and dizzy"
+    ],
+    "red_flags": [
+      "cannot stand",
+      "very weak pulse",
+      "not passing urine"
+    ],
+    "context": [
+      "several people in the area have the same thing",
+      "after flooding",
+      "drinks from a stream, well or unsafe water"
+    ],
+    "leak_terms": [
+      "cholera",
+      "vibrio"
+    ],
+    "source": "https://www.who.int/news-room/fact-sheets/detail/cholera",
+    "required_clues": [
+      [
+        "watery",
+        "rice",
+        "running stomach",
+        "stooling",
+        "purg",
+        "diarr",
+        "poo",
+        "run",
+        "like water",
+        "passing water"
+      ],
+      [
+        "thirst",
+        "sunken",
+        "cramp",
+        "urine",
+        "dizz",
+        "weak",
+        "people",
+        "flood",
+        "stream",
+        "well water",
+        "borehole"
+      ]
+    ]
+  },
+  "C13": {
+    "narrator": "parent describing a child",
+    "key_symptoms": [
+      "high fever",
+      "cough",
+      "runny nose",
+      "red, watery eyes",
+      "rash that starts on the face or behind the ears and spreads down the body",
+      "small white spots inside the cheeks"
+    ],
+    "red_flags": [
+      "difficulty breathing",
+      "convulsions",
+      "not drinking"
+    ],
+    "context": [
+      "child did not complete vaccinations",
+      "other children nearby have a rash"
+    ],
+    "leak_terms": [
+      "measles",
+      "rubeola",
+      "morbilli"
+    ],
+    "source": "https://www.who.int/news-room/fact-sheets/detail/measles",
+    "required_clues": [
+      [
+        "rash",
+        "spot"
+      ],
+      [
+        "fever",
+        "hot",
+        "temperature",
+        "feverish",
+        "eye",
+        "cough",
+        "cheek",
+        "mouth"
+      ]
+    ]
+  },
+  "C14": {
+    "narrator": "adult describing own symptoms",
+    "key_symptoms": [
+      "tiredness for weeks",
+      "loss of appetite",
+      "nausea",
+      "yellow eyes or skin",
+      "dark urine",
+      "pale stool",
+      "pain under the right ribs",
+      "joint pains"
+    ],
+    "red_flags": [
+      "confusion",
+      "swollen belly",
+      "vomiting blood"
+    ],
+    "context": [
+      "a relative has liver problems",
+      "had a blood transfusion or shared razors",
+      "found during a blood donation or antenatal screening"
+    ],
+    "leak_terms": [
+      "hepatitis",
+      "hep b",
+      "hbv",
+      "hbsag"
+    ],
+    "source": "https://www.who.int/news-room/fact-sheets/detail/hepatitis-b",
+    "required_clues": [
+      [
+        "yellow",
+        "dark urine",
+        "pale stool",
+        "right side",
+        "right rib",
+        "swollen",
+        "swell",
+        "liver",
+        "screen",
+        "donat",
+        "test",
+        "pale"
+      ]
+    ]
+  },
+  "C16": {
+    "narrator": "adolescent or young adult describing own symptoms, or parent describing a school-age child",
+    "key_symptoms": [
+      "blood in urine, especially at the end of urinating",
+      "pain when urinating",
+      "lower stomach pain",
+      "or: stomach pain, diarrhoea and blood in stool",
+      "tiredness"
+    ],
+    "red_flags": [],
+    "context": [
+      "swims, fishes or washes in a river, stream or dam",
+      "farm work in irrigated fields"
+    ],
+    "leak_terms": [
+      "schistosom",
+      "bilharzia"
+    ],
+    "source": "https://www.who.int/news-room/fact-sheets/detail/schistosomiasis",
+    "required_clues": [
+      [
+        "blood"
+      ],
+      [
+        "urin",
+        "pee",
+        "piss",
+        "wee",
+        "toilet",
+        "stool",
+        "poo",
+        "river",
+        "stream",
+        "swim",
+        "dam",
+        "faeces",
+        "feces",
+        "pass water",
+        "passing water"
+      ]
+    ]
+  },
+  "C25": {
+    "narrator": "adult describing own symptoms, or relative describing an older adult",
+    "key_symptoms": [
+      "very severe headache",
+      "blurred vision",
+      "chest pain",
+      "shortness of breath",
+      "confusion",
+      "nosebleed",
+      "weakness or numbness",
+      "a very high blood pressure reading such as 200/120"
+    ],
+    "red_flags": [
+      "chest pain",
+      "confusion",
+      "one-sided weakness"
+    ],
+    "context": [
+      "stopped blood pressure drugs because of cost",
+      "known high blood pressure for years"
+    ],
+    "leak_terms": [
+      "hypertensive",
+      "malignant hypertension"
+    ],
+    "source": "https://www.who.int/news-room/fact-sheets/detail/hypertension",
+    "required_clues": [
+      [
+        "bp",
+        "pressure",
+        "reading",
+        "measured",
+        "check my",
+        "pills",
+        "drugs for"
+      ],
+      [
+        "headache",
+        "head",
+        "vision",
+        "blur",
+        "chest",
+        "confus",
+        "nose",
+        "weak",
+        "numb",
+        "breath"
+      ]
+    ]
+  },
+  "C29": {
+    "narrator": "adult describing own symptoms",
+    "key_symptoms": [
+      "urinating very often, especially at night",
+      "always thirsty",
+      "always hungry",
+      "losing weight without trying",
+      "tiredness",
+      "blurred vision",
+      "wounds that heal slowly",
+      "tingling or numb feet",
+      "genital itching"
+    ],
+    "red_flags": [],
+    "context": [
+      "a parent has the same problem",
+      "over 40",
+      "overweight"
+    ],
+    "leak_terms": [
+      "diabet",
+      "blood sugar",
+      "sugar level",
+      "glucose",
+      "insulin"
+    ],
+    "source": "https://www.who.int/news-room/fact-sheets/detail/diabetes",
+    "required_clues": [
+      [
+        "urin",
+        "pee",
+        "piss",
+        "wee",
+        "toilet",
+        "pass water",
+        "passing water"
+      ],
+      [
+        "thirst",
+        "drink water",
+        "hungry",
+        "hunger",
+        "weight",
+        "thin",
+        "tingl",
+        "numb",
+        "heal",
+        "itch",
+        "blur"
+      ]
+    ]
+  },
+  "C45": {
+    "narrator": "woman describing own symptoms",
+    "key_symptoms": [
+      "painless lump in the breast or armpit",
+      "one breast changing size or shape",
+      "skin of the breast dimpled like an orange peel",
+      "nipple pulled inwards",
+      "bloody nipple discharge",
+      "sore on the breast that will not heal"
+    ],
+    "red_flags": [],
+    "context": [
+      "noticed it months ago and was afraid",
+      "tried herbs first"
+    ],
+    "leak_terms": [
+      "cancer",
+      "tumour",
+      "tumor",
+      "malignan",
+      "carcinoma"
+    ],
+    "source": "https://www.who.int/news-room/fact-sheets/detail/breast-cancer",
+    "required_clues": [
+      [
+        "breast",
+        "nipple",
+        "armpit"
+      ],
+      [
+        "lump",
+        "swell",
+        "shape",
+        "size",
+        "dimpl",
+        "orange",
+        "inside",
+        "inward",
+        "pull",
+        "discharge",
+        "blood",
+        "sore",
+        "wound",
+        "different"
+      ]
+    ]
+  },
+  "C46": {
+    "narrator": "woman describing own symptoms",
+    "key_symptoms": [
+      "bleeding after sex",
+      "bleeding between periods or after menopause",
+      "foul-smelling vaginal discharge",
+      "pelvic or lower back pain",
+      "pain during sex",
+      "weight loss"
+    ],
+    "red_flags": [
+      "heavy bleeding"
+    ],
+    "context": [
+      "never had a cervical screening",
+      "over 30"
+    ],
+    "leak_terms": [
+      "cancer",
+      "tumour",
+      "tumor",
+      "malignan",
+      "carcinoma",
+      "cervical"
+    ],
+    "source": "https://www.who.int/news-room/fact-sheets/detail/cervical-cancer",
+    "required_clues": [
+      [
+        "bleed",
+        "blood",
+        "discharge",
+        "smell",
+        "stain"
+      ],
+      [
+        "sex",
+        "intercourse",
+        "husband",
+        "intima",
+        "period",
+        "menopause",
+        "private",
+        "vagin",
+        "after"
+      ]
+    ]
+  },
+  "C47": {
+    "narrator": "man over 50 describing own symptoms, or a son describing his father",
+    "key_symptoms": [
+      "weak urine stream",
+      "waking at night to urinate",
+      "difficulty starting to urinate",
+      "dribbling",
+      "feeling the bladder is not empty",
+      "blood in urine or semen",
+      "pain in the back or hips",
+      "weight loss"
+    ],
+    "red_flags": [
+      "cannot pass urine at all"
+    ],
+    "context": [
+      "symptoms getting worse over months"
+    ],
+    "leak_terms": [
+      "cancer",
+      "tumour",
+      "tumor",
+      "malignan",
+      "carcinoma",
+      "prostate",
+      "psa"
+    ],
+    "source": "NEEDS_CITATION",
+    "required_clues": [
+      [
+        "urin",
+        "pee",
+        "piss",
+        "wee",
+        "toilet",
+        "pass water",
+        "passing water"
+      ],
+      [
+        "weak",
+        "dribbl",
+        "drop",
+        "start",
+        "night",
+        "empty",
+        "blood",
+        "back",
+        "hip",
+        "weight",
+        "flow",
+        "stream"
+      ]
+    ]
+  },
+  "C49": {
+    "narrator": "adult or adolescent describing own symptoms, or parent describing a child",
+    "key_symptoms": [
+      "intense itching that is worse at night",
+      "small bumps or rash between the fingers",
+      "rash on the wrists, waist, armpits or genitals",
+      "scratch marks"
+    ],
+    "red_flags": [
+      "infected sores with pus"
+    ],
+    "context": [
+      "other family members or roommates are also itching",
+      "boarding school or crowded house"
+    ],
+    "leak_terms": [
+      "scabies",
+      "sarcoptes",
+      "mites"
+    ],
+    "source": "https://www.who.int/news-room/fact-sheets/detail/scabies",
+    "required_clues": [
+      [
+        "itch",
+        "scratch"
+      ],
+      [
+        "night",
+        "finger",
+        "wrist",
+        "waist",
+        "armpit",
+        "family",
+        "roommate",
+        "flatmate",
+        "everybody",
+        "others",
+        "brother",
+        "sister",
+        "boarding",
+        "hostel",
+        "children",
+        "pikin",
+        "sleep",
+        "hand"
+      ]
+    ]
+  },
+  "C55": {
+    "narrator": "a witness such as a parent, spouse or friend, or the person describing what others told them",
+    "key_symptoms": [
+      "sudden shaking or jerking of the body",
+      "fell down and became stiff",
+      "foam from the mouth",
+      "bit the tongue",
+      "unconscious for some minutes",
+      "confused or sleepy afterwards",
+      "wet themselves",
+      "in a young child: shaking during a high fever"
+    ],
+    "red_flags": [
+      "shaking lasting more than 5 minutes",
+      "not waking up after"
+    ],
+    "context": [
+      "has happened before",
+      "first time it happened"
+    ],
+    "leak_terms": [
+      "epilep"
+    ],
+    "source": "https://www.who.int/news-room/fact-sheets/detail/epilepsy",
+    "required_clues": [
+      [
+        "shak",
+        "jerk",
+        "convuls",
+        "fit",
+        "stiff",
+        "foam",
+        "fell",
+        "fall",
+        "collaps"
+      ]
+    ]
+  },
+  "C58": {
+    "narrator": "parent or caregiver describing a child under 5",
+    "key_symptoms": [
+      "child is very thin, bones showing",
+      "swollen feet, legs or face",
+      "hair thinning or changing colour",
+      "skin peeling or darkening",
+      "not eating",
+      "very weak and miserable",
+      "repeated diarrhoea"
+    ],
+    "red_flags": [
+      "not eating at all",
+      "very sleepy",
+      "swelling of the whole body"
+    ],
+    "context": [
+      "stopped breastfeeding early",
+      "family cannot afford enough food",
+      "recent illness such as measles or diarrhoea"
+    ],
+    "leak_terms": [
+      "malnutrition",
+      "malnourish",
+      "kwashiorkor",
+      "marasmus"
+    ],
+    "source": "https://www.who.int/news-room/fact-sheets/detail/malnutrition",
+    "required_clues": [
+      [
+        "thin",
+        "bone",
+        "swell",
+        "swollen",
+        "hair",
+        "peel",
+        "weight",
+        "skinny",
+        "lean"
+      ]
+    ]
+  },
+  "C59": {
+    "narrator": "mother or relative describing a newborn in the first weeks of life",
+    "key_symptoms": [
+      "baby's eyes are yellow",
+      "yellow colour spreading from face to body",
+      "baby is very sleepy",
+      "baby is not feeding well",
+      "dark urine",
+      "pale stool"
+    ],
+    "red_flags": [
+      "yellow palms and soles",
+      "baby too sleepy to feed",
+      "high-pitched cry",
+      "baby arching the back"
+    ],
+    "context": [
+      "started on day 2 or 3 after birth",
+      "delivered at home"
+    ],
+    "leak_terms": [
+      "jaundice",
+      "bilirubin",
+      "icterus"
+    ],
+    "source": "NEEDS_CITATION",
+    "required_clues": [
+      [
+        "yellow"
+      ],
+      [
+        "baby",
+        "newborn",
+        "pikin",
+        "born",
+        "days old",
+        "week"
+      ]
+    ]
+  },
+  "C15": {
+    "narrator": "adult describing own symptoms, relative describing an adult, or mother describing a newborn",
+    "key_symptoms": [
+      "jaw is stiff and cannot open the mouth well",
+      "neck stiffness",
+      "painful muscle spasms",
+      "difficulty swallowing",
+      "body becomes stiff",
+      "spasms triggered by noise or touch",
+      "in a newborn: stopped sucking, body stiff, spasms between day 3 and 28"
+    ],
+    "red_flags": [
+      "difficulty breathing",
+      "spasms"
+    ],
+    "context": [
+      "stepped on a rusty nail or had a dirty cut a week or two ago",
+      "baby delivered at home and something was put on the cord"
+    ],
+    "leak_terms": [
+      "tetanus",
+      "lockjaw",
+      "lock jaw",
+      "clostridium"
+    ],
+    "source": "https://www.who.int/news-room/fact-sheets/detail/tetanus",
+    "required_clues": [
+      [
+        "jaw",
+        "stiff",
+        "spasm",
+        "suck",
+        "swallow",
+        "mouth"
+      ],
+      [
+        "nail",
+        "cut",
+        "wound",
+        "injur",
+        "cord",
+        "born",
+        "stiff",
+        "spasm",
+        "neck"
+      ]
+    ]
+  },
+  "C60": {
+    "narrator": "adult describing own bite, or relative describing a family member or child",
+    "key_symptoms": [
+      "bitten by a snake on the farm, in the bush or at night",
+      "pain and swelling at the bite spreading up the limb",
+      "two small marks at the bite",
+      "bleeding from the bite, gums or nose",
+      "blood in urine",
+      "drooping eyelids",
+      "difficulty breathing or swallowing",
+      "vomiting"
+    ],
+    "red_flags": [
+      "bleeding that will not stop",
+      "difficulty breathing"
+    ],
+    "context": [
+      "used herbs or a black stone first",
+      "happened hours ago"
+    ],
+    "leak_terms": [
+      "envenom",
+      "antivenom",
+      "anti-venom"
+    ],
+    "source": "https://www.who.int/news-room/fact-sheets/detail/snakebite-envenoming",
+    "required_clues": [
+      [
+        "snake",
+        "bite",
+        "bitten"
+      ]
+    ]
+  }
+}

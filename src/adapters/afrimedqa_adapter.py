@@ -4,9 +4,54 @@ Extracts clinical prompts, clean question text, specialty classifications, and c
 """
 
 import json
+import re
 import pandas as pd
 from pathlib import Path
 from src.adapters.base_adapter import validate_canonical_record
+
+# Consumer-query prompts follow one template:
+# "Your <person> complains of <symptoms> and thinks <she/he> has <condition> and is going to visit..."
+SEED_TEMPLATE = re.compile(
+    r"complains? of (.+?) and (?:thinks|believes|suspects) (?:s?he|they|I) "
+    r"(?:has|have|might have|may have) (.+?) and is going to",
+    re.I | re.S,
+)
+
+
+def extract_afrimedqa_seeds(csv_path: str, out_jsonl_path: str) -> int:
+    """
+    Extracts unique (symptoms, condition) pairs from templated consumer-query prompts.
+    The condition is read from the template, never shown in the output text.
+    """
+    df = pd.read_csv(csv_path, dtype=str)
+    Path(out_jsonl_path).parent.mkdir(parents=True, exist_ok=True)
+
+    seen, count = set(), 0
+    with open(out_jsonl_path, "w", encoding="utf-8") as f:
+        for prompt in df.loc[df["question_type"] == "consumer_queries", "prompt"].dropna():
+            m = SEED_TEMPLATE.search(prompt)
+            if not m:
+                continue
+            symptoms = " ".join(m.group(1).lower().split())
+            condition = re.sub(r"^\d+\.\s*", "", " ".join(m.group(2).lower().split()))
+            if (symptoms, condition) in seen:
+                continue
+            seen.add((symptoms, condition))
+
+            record = {
+                "id": f"AFS_{count:05d}",
+                "text": f"I have {symptoms}.",
+                "labels": [condition],
+                "language_variant": "Clinician_Authored_Seed",
+                "severity_level": "Routine",
+                "icd10_codes": ["R69"],
+                "source": "afrimedqa_seed",
+            }
+            if validate_canonical_record(record):
+                f.write(json.dumps(record) + "\n")
+                count += 1
+
+    return count
 
 def process_afrimedqa_csv(csv_path: str, out_jsonl_path: str) -> int:
     """Reads raw AfriMed-QA CSV, handles consumer prompt concatenation, and exports canonical JSONL."""
