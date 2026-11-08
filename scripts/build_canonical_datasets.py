@@ -14,6 +14,8 @@ from src.adapters.ddxplus_adapter import process_ddxplus_csv
 from src.adapters.kaggle773_adapter import process_kaggle773_csv
 from src.adapters.afrimedqa_adapter import process_afrimedqa_csv
 from src.adapters.symcat_adapter import process_symcat_csv
+from src.adapters.symptom2disease_adapter import process_symptom2disease_csv
+from src.adapters.zenodo_infectious_adapter import process_zenodo_infectious_csv
 
 def build_all_canonical():
     print("--- Building Canonical JSONL Datasets from Raw Sources (Full Uncapped) ---")
@@ -47,6 +49,16 @@ def build_all_canonical():
     print(f"Processing SymCAT from {sym_path} (Uncapped)...")
     c4 = process_symcat_csv(str(sym_path), "data/canonical/symcat.jsonl")
     print(f"SymCAT Canonical Records: {c4:,}")
+
+    # 5. Symptom2Disease (Kaggle niyarrbarman/symptom2disease, 1.2k patient narratives)
+    s2d_path = Path("data/raw/symptom2disease/Symptom2Disease.csv")
+    c5 = process_symptom2disease_csv(str(s2d_path), "data/canonical/symptom2disease.jsonl")
+    print(f"Symptom2Disease Canonical Records: {c5:,}")
+
+    # 6. Zenodo infectious disease (DOI 10.5281/zenodo.13338116, 12k symptom lists)
+    zen_path = Path("data/raw/zenodo_infectious/health_dataset.csv")
+    c6 = process_zenodo_infectious_csv(str(zen_path), "data/canonical/zenodo_infectious.jsonl")
+    print(f"Zenodo Infectious Canonical Records: {c6:,}")
 
 if __name__ == "__main__":
     build_all_canonical()

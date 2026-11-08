@@ -329,7 +329,7 @@ def perform_triage(raw_text: str):
         not predictions
         or not isinstance(predictions, list)
         or len(predictions) == 0
-        or predictions[0].get("condition") == "Symptom Analysis Pending"
+        or predictions[0].get("condition") in ("Symptom Analysis Pending", "Other")  # v2 model's "none of the 60" class
     )
 
     if is_fallback:

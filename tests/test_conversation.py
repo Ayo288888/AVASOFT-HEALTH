@@ -53,6 +53,18 @@ class TestPerformTriage(unittest.TestCase):
         self.assertIn("<h4>", prompt)
         self.assertIn("follow-up question", prompt)
 
+    @mock.patch.object(main, "generate_llm_response", return_value=json.dumps({
+        "top_predictions": [{"condition": "Acute Pancreatitis", "confidence": "70.0%"}],
+        "doctor_note": "<h4>Assessment</h4>",
+    }))
+    @mock.patch.object(main, "query_huggingface_model",
+                       return_value=[{"condition": "Other", "confidence": "72.0%"},
+                                     {"condition": "Pneumonia", "confidence": "11.0%"}])
+    def test_other_prediction_is_never_shown_and_llm_names_the_condition(self, hf, llm):
+        preds, note = main.perform_triage("Severe upper belly pain going to my back")
+        self.assertEqual(preds, [{"condition": "Acute Pancreatitis", "confidence": "70.0%"}])
+        self.assertIn("disease classification", llm.call_args.args[0][-1]["content"])
+
     @mock.patch.object(main, "generate_llm_response", return_value="Yes, get a malaria test.")
     @mock.patch.object(main, "query_huggingface_model")
     def test_follow_up_is_conversational_with_history(self, hf, llm):
