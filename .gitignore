@@ -12,3 +12,5 @@ data/combined_dataset.csv
 data/combined_dataset.jsonl
 scratch/data/raw/symptom2disease/
 data/raw/zenodo_infectious/
+.kaggle_runs/
+.superpowers/
