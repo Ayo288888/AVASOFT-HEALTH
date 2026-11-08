@@ -85,6 +85,12 @@ class TestFindError(unittest.TestCase):
         self.assertIsNone(server.find_error("", self.cells))
         self.assertIsNone(server.find_error("not json", self.cells))
 
+    def test_arrow_line_beats_context_lines_shared_with_other_cells(self):
+        cells = [{"number": 1, "type": "code", "source": "model.train()"},
+                 {"number": 2, "type": "code", "source": "model.train()\nboom()"}]
+        log = "Traceback (most recent call last):\n      1 model.train()\n----> 2 boom()\nValueError: bad\n"
+        self.assertEqual(server.find_error(log, cells)["cell"], 2)
+
     def test_warnings_are_not_errors(self):
         self.assertIsNone(server.find_error("FutureWarning: old api\n", self.cells))
 
@@ -108,6 +114,25 @@ class TestNotebookTools(unittest.TestCase):
     def test_read_cells_numbers_from_one_and_joins_source(self):
         self.nb.write_text(json.dumps(notebook(code(["a\n", "b"]))), encoding="utf-8")
         self.assertEqual(server.read_cells(self.nb), [{"number": 1, "type": "code", "source": "a\nb"}])
+
+    def test_tokens_in_notebook_source_are_scrubbed(self):
+        self.nb.write_text(json.dumps(notebook(code("key = 'KGAT_secret9'"))), encoding="utf-8")
+        self.assertNotIn("KGAT_secret9", server.read_cells(self.nb)[0]["source"])
+
+    def test_tokens_in_metrics_are_scrubbed(self):
+        def cli(args):
+            folder = Path(args[args.index("-p") + 1])
+            (folder / "metrics.json").write_text('{"note": "KGAT_secret9"}')
+            return ""
+
+        with mock.patch.object(server, "run_cli", side_effect=cli):
+            self.assertEqual(server.get_results(DEDICATED)["metrics"], {"note": "[REDACTED]"})
+
+    @mock.patch.object(server, "run_cli", return_value="")
+    def test_download_can_be_limited_to_one_file(self, cli):
+        server.download_results(DEDICATED, "metrics")
+        args = cli.call_args.args[0]
+        self.assertEqual(args[args.index("--file-pattern") + 1], "metrics")
 
     @mock.patch.object(server, "run_cli")
     def test_run_notebook_refuses_before_calling_cli(self, cli):
@@ -204,7 +229,7 @@ class TestTuning(unittest.TestCase):
         self.nb = self.dir / "train.ipynb"
         self.nb.write_text(json.dumps(notebook(code("old", tags=["parameters"]), code("train()"))), encoding="utf-8")
         for name, kwargs in (("push", {"return_value": "ok"}), ("run_status", {"return_value": "running"}),
-                             ("get_results", {})):
+                             ("download_results", {})):
             patcher = mock.patch.object(server, name, **kwargs)
             setattr(self, name, patcher.start())
             self.addCleanup(patcher.stop)
@@ -220,7 +245,7 @@ class TestTuning(unittest.TestCase):
 
     def finish(self, tid, n, f1=0.5):
         self.run_status.return_value = "complete"
-        self.get_results.return_value = {"metrics": {"trial_id": f"{tid}-{n}", "val_macro_f1": f1}}
+        self.download_results.return_value = {"metrics": {"trial_id": f"{tid}-{n}", "val_macro_f1": f1}}
         return server.tuning_status(tid)
 
     def fail(self):
@@ -260,7 +285,7 @@ class TestTuning(unittest.TestCase):
     def test_stale_result_is_ignored(self):
         tid = self.start()
         self.run_status.return_value = "complete"
-        self.get_results.return_value = {"metrics": {"trial_id": "older-trial", "val_macro_f1": 0.9}}
+        self.download_results.return_value = {"metrics": {"trial_id": "older-trial", "val_macro_f1": 0.9}}
         server.tuning_status(tid)
         self.assertEqual(self.state(tid)["trials"][0]["state"], "running")
         self.assertEqual(self.push.call_count, 1)
@@ -275,14 +300,14 @@ class TestTuning(unittest.TestCase):
     def test_completed_run_without_metrics_is_failed(self):
         tid = self.start()
         self.run_status.return_value = "complete"
-        self.get_results.return_value = {"metrics": None}
+        self.download_results.return_value = {"metrics": None}
         server.tuning_status(tid)
         self.assertEqual(self.state(tid)["trials"][0]["state"], "failed")
 
     def test_metrics_missing_the_score_are_failed(self):
         tid = self.start()
         self.run_status.return_value = "complete"
-        self.get_results.return_value = {"metrics": {"trial_id": f"{tid}-1"}}
+        self.download_results.return_value = {"metrics": {"trial_id": f"{tid}-1"}}
         server.tuning_status(tid)
         self.assertEqual(self.state(tid)["trials"][0]["state"], "failed")
 
@@ -345,6 +370,96 @@ class TestTuning(unittest.TestCase):
             with self.assertRaises(server.KaggleError):
                 server.tuning_status(bad)
         self.push.assert_not_called()
+
+    def test_previous_run_without_metrics_is_not_this_trials_failure(self):
+        tid = self.start()
+        self.run_status.return_value = "complete"
+        self.download_results.return_value = {"metrics": None}
+        with mock.patch.object(server, "STALE_SECONDS", 90):
+            server.tuning_status(tid)
+        self.assertEqual(self.state(tid)["trials"][0]["state"], "running")
+        self.assertEqual(self.push.call_count, 1)
+
+    def test_second_tuning_is_refused_while_one_is_active(self):
+        self.start()
+        with self.assertRaises(server.KaggleError):
+            self.start()
+        self.assertEqual(self.push.call_count, 1)
+
+    def test_run_notebook_is_refused_during_a_tuning(self):
+        self.start()
+        with self.assertRaises(server.KaggleError):
+            server.run_notebook(str(self.nb))
+        self.assertEqual(self.push.call_count, 1)
+
+    def test_a_stopped_tuning_no_longer_blocks_pushes(self):
+        tid = self.start()
+        self.fail()
+        server.tuning_status(tid)
+        server.tuning_status(tid)
+        server.run_notebook(str(self.nb))
+        self.assertEqual(self.push.call_count, 3)
+
+    def test_run_that_never_finishes_is_eventually_failed(self):
+        tid = self.start()
+        state = self.state(tid)
+        state["trials"][0]["pushed_at"] -= server.RUN_TIMEOUT_SECONDS + 1
+        server.save_state(tid, state)
+        self.run_status.return_value = "complete"
+        self.download_results.return_value = {"metrics": {"trial_id": "someone-else", "val_macro_f1": 0.9}}
+        server.tuning_status(tid)
+        self.assertEqual(self.state(tid)["trials"][0]["state"], "failed")
+
+    def test_push_with_unknown_outcome_stops_without_pushing_again(self):
+        self.push.side_effect = server.KaggleTimeout("timed out")
+        tid = self.start()
+        for _ in range(3):
+            result = server.tuning_status(tid)
+        self.assertEqual(self.push.call_count, 1)
+        self.assertTrue(self.state(tid)["stopped"])
+        self.assertIn("timed out", result["note"])
+
+    def test_interrupted_push_is_not_repeated(self):
+        tid = self.start()
+        state = self.state(tid)
+        state["trials"][0]["state"] = "pushing"
+        server.save_state(tid, state)
+        server.tuning_status(tid)
+        self.assertEqual(self.push.call_count, 1)
+        self.assertTrue(self.state(tid)["stopped"])
+
+    def test_tuning_downloads_only_metrics(self):
+        tid = self.start()
+        self.finish(tid, 1)
+        self.download_results.assert_called_with(DEDICATED, server.METRICS_PATTERN)
+
+    def test_bad_metrics_values_fail_the_trial(self):
+        for bad in (["not", "a", "dict"], {"val_macro_f1": None}, {"val_macro_f1": "high"},
+                    {"val_macro_f1": float("nan")}, {"val_macro_f1": True}):
+            with self.subTest(bad=bad):
+                tid = server.start_tuning(str(self.nb), {"lr": [1]})["tuning_id"]
+                if isinstance(bad, dict):
+                    bad = {**bad, "trial_id": f"{tid}-1"}
+                self.run_status.return_value = "complete"
+                self.download_results.return_value = {"metrics": bad}
+                server.tuning_status(tid)
+                self.assertEqual(self.state(tid)["trials"][0]["state"], "failed")
+                server.compare_trials(tid)
+
+    def test_missing_saved_notebook_is_a_plain_note(self):
+        tid = self.start()
+        (self.dir / "runs" / "tuning" / f"{tid}.ipynb").unlink()
+        result = self.finish(tid, 1)
+        self.assertIn("error", result["note"].lower())
+        self.assertEqual(self.push.call_count, 1)
+
+    def test_state_without_stopped_flag_is_corrupt(self):
+        tid = self.start()
+        state = self.state(tid)
+        del state["stopped"]
+        server.save_state(tid, state)
+        with self.assertRaises(server.KaggleError):
+            server.tuning_status(tid)
 
     def test_compare_ranks_by_val_macro_f1(self):
         tid = self.start()
