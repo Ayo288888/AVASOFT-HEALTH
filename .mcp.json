@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "kaggle": {
+      "command": "python",
+      "args": ["tools/kaggle_mcp/server.py"],
+      "env": {
+        "KAGGLE_MCP_NOTEBOOK": "wisdomilori/afrocare-stage1-v2"
+      }
+    }
+  }
+}
