@@ -4,8 +4,11 @@ MCP server that reads, runs and debugs the owner's Kaggle notebooks and runs bou
 Wraps the Kaggle CLI, which handles authentication. Pushes are only allowed to the notebook
 named by KAGGLE_MCP_NOTEBOOK, because a push replaces a notebook's code.
 """
+import collections
+import copy
 import csv
 import io
+import itertools
 import json
 import os
 import re
@@ -13,6 +16,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
+import uuid
 from pathlib import Path
 
 from mcp.server.mcpserver import MCPServer
@@ -20,6 +25,8 @@ from mcp.server.mcpserver import MCPServer
 ROOT = Path(__file__).resolve().parent.parent.parent
 RUNS = ROOT / ".kaggle_runs"
 CLI_TIMEOUT = 300
+MAX_TRIALS_LIMIT = 12
+STALE_SECONDS = 90
 
 mcp = MCPServer("kaggle")
 
@@ -197,3 +204,144 @@ def get_results(ref: str) -> dict:
     except ValueError:
         metrics = None
     return {"folder": str(folder), "files": files, "metrics": metrics}
+
+
+def expand_grid(grid: dict[str, list], max_trials: int) -> list[dict]:
+    if not 1 <= max_trials <= MAX_TRIALS_LIMIT:
+        raise KaggleError(f"max_trials must be between 1 and {MAX_TRIALS_LIMIT}.")
+    if not grid or not all(isinstance(v, list) and v for v in grid.values()):
+        raise KaggleError("Grid must map each parameter name to a non-empty list.")
+    for name, values in grid.items():
+        if not name.isidentifier() or not all(isinstance(v, (bool, int, float, str)) for v in values):
+            raise KaggleError(f"Invalid grid entry: {name!r}.")
+    trials = [dict(zip(grid, combo)) for combo in itertools.product(*grid.values())]
+    if len(trials) > max_trials:
+        raise KaggleError(f"Grid has {len(trials)} trials, more than max_trials ({max_trials}).")
+    return trials
+
+
+def set_parameters(notebook: dict, params: dict) -> dict:
+    out = copy.deepcopy(notebook)
+    for cell in out["cells"]:
+        if cell["cell_type"] == "code" and "parameters" in cell.get("metadata", {}).get("tags", []):
+            cell["source"] = "".join(f"{name} = {value!r}\n" for name, value in params.items())
+            return out
+    raise KaggleError("Notebook has no code cell tagged 'parameters'.")
+
+
+def tuning_path(tuning_id: str, suffix: str = ".json") -> Path:
+    if not re.fullmatch(r"[\w-]+", tuning_id or ""):
+        raise KaggleError(f"Invalid tuning id: {tuning_id!r}.")
+    return RUNS / "tuning" / f"{tuning_id}{suffix}"
+
+
+def save_state(tuning_id: str, state: dict) -> None:
+    path = tuning_path(tuning_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp = path.with_suffix(".tmp")
+    temp.write_text(json.dumps(state, indent=2), encoding="utf-8")
+    os.replace(temp, path)
+
+
+def load_state(tuning_id: str) -> dict:
+    try:
+        state = json.loads(tuning_path(tuning_id).read_text(encoding="utf-8"))
+        state["trials"], state["ref"]
+    except OSError:
+        raise KaggleError(f"Unknown tuning id: {tuning_id!r}.")
+    except (ValueError, KeyError, TypeError):
+        raise KaggleError(f"Tuning state for {tuning_id!r} is corrupt.")
+    return state
+
+
+def launch(tuning_id: str, state: dict, trial: dict) -> None:
+    notebook = json.loads(tuning_path(tuning_id, ".ipynb").read_text(encoding="utf-8"))
+    prepared = set_parameters(notebook, {"TRIAL_ID": trial["id"], **trial["params"]})
+    with tempfile.TemporaryDirectory() as folder:
+        path = Path(folder) / "notebook.ipynb"
+        path.write_text(json.dumps(prepared), encoding="utf-8")
+        push(path, state["ref"])
+    trial.update(state="running", pushed_at=time.time())
+    save_state(tuning_id, state)
+
+
+def summary(tuning_id: str, state: dict, note: str = "") -> dict:
+    counts = collections.Counter(t["state"] for t in state["trials"])
+    return {"tuning_id": tuning_id, "stopped": state["stopped"], "counts": dict(counts), "note": note}
+
+
+def record_outcome(state: dict, trial: dict, status: str) -> bool:
+    """Updates the running trial. Returns False if it should stay running."""
+    if status in ("queued", "running"):
+        return False
+    if status != "complete":
+        # Straight after a push, Kaggle can still report the previous version's outcome.
+        if time.time() - trial["pushed_at"] < STALE_SECONDS:
+            return False
+        trial.update(state="failed", reason=f"run ended with status {status}")
+    else:
+        metrics = get_results(state["ref"])["metrics"]
+        if metrics and metrics.get("trial_id") not in (None, trial["id"]):
+            return False  # output of an earlier version
+        if not metrics or metrics.get("trial_id") is None or "val_macro_f1" not in metrics:
+            trial.update(state="failed", reason="metrics.json missing trial_id or val_macro_f1")
+        else:
+            trial.update(state="done", metrics=metrics)
+    finished = [t["state"] for t in state["trials"] if t["state"] in ("done", "failed")]
+    state["stopped"] = finished[-2:] == ["failed", "failed"]
+    return True
+
+
+@mcp.tool()
+def start_tuning(path: str, grid: dict, max_trials: int = 8) -> dict:
+    """Start a grid of trials on the dedicated notebook, one run per trial, and launch the first."""
+    ref = os.environ.get("KAGGLE_MCP_NOTEBOOK", "")
+    require_dedicated(ref)
+    params = expand_grid(grid, max_trials)
+    notebook = json.loads(Path(path).read_text(encoding="utf-8"))
+    set_parameters(notebook, {})
+    tuning_id = f"tune-{int(time.time())}-{uuid.uuid4().hex[:6]}"
+    tuning_path(tuning_id).parent.mkdir(parents=True, exist_ok=True)
+    tuning_path(tuning_id, ".ipynb").write_text(json.dumps(notebook), encoding="utf-8")
+    state = {"notebook": path, "ref": ref, "stopped": False,
+             "trials": [{"id": f"{tuning_id}-{i}", "params": p, "state": "pending", "metrics": None}
+                        for i, p in enumerate(params, 1)]}
+    save_state(tuning_id, state)
+    try:
+        launch(tuning_id, state, state["trials"][0])
+    except KaggleError as error:
+        return summary(tuning_id, state, f"First push failed and will retry on tuning_status: {error}")
+    return summary(tuning_id, state)
+
+
+@mcp.tool()
+def tuning_status(tuning_id: str) -> dict:
+    """Move a tuning forward: record a finished trial and start the next one."""
+    state = load_state(tuning_id)
+    if state["stopped"]:
+        return summary(tuning_id, state, "Stopped after two failed trials in a row.")
+    try:
+        running = next((t for t in state["trials"] if t["state"] == "running"), None)
+        if running:
+            if not record_outcome(state, running, run_status(state["ref"])):
+                return summary(tuning_id, state)
+            save_state(tuning_id, state)
+            if state["stopped"]:
+                return summary(tuning_id, state, "Stopped after two failed trials in a row.")
+        pending = next((t for t in state["trials"] if t["state"] == "pending"), None)
+        if pending:
+            launch(tuning_id, state, pending)
+    except KaggleError as error:
+        return summary(tuning_id, state, f"Kaggle error, will retry on the next call: {error}")
+    return summary(tuning_id, state)
+
+
+@mcp.tool()
+def compare_trials(tuning_id: str) -> list[dict]:
+    """Rank finished trials by validation macro F1; unfinished and failed trials come last."""
+    trials = load_state(tuning_id)["trials"]
+    return sorted(trials, key=lambda t: -t["metrics"]["val_macro_f1"] if t["state"] == "done" else float("inf"))
+
+
+if __name__ == "__main__":
+    mcp.run()
